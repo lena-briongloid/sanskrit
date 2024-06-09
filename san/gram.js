@@ -1,5 +1,5 @@
-document.getElementById("submit").onclick = function() {
-	let index = findExact();
+function setADFB(call = false) {
+	let index = findExact(call);
 
 	//-1을 받았다면 그대로 종료
 	if (index == -1) { return 0; }
@@ -34,7 +34,7 @@ document.getElementById("submit").onclick = function() {
 	let t2 = document.getElementsByClassName("ADFB_head_word")[0];
 	t2.innerHTML = grid(dict, 1, index);
 	let t3 = document.getElementsByClassName("ADFB_head_sound")[0];
-	t3.innerHTML = "[" + GetHangul(grid(dict, 1, index), true) + "]";
+	t3.innerHTML = "[" + showPronounce(grid(dict, 1, index), true) + "]";
 
 	//문법
 	let word_class = grid(dict, 2, index);
@@ -42,21 +42,21 @@ document.getElementById("submit").onclick = function() {
 
 	if (word_class == "m" || word_class == "f" || word_class == "n") {
 		let g1 = grid(dict, 7, index);
-		let g2 = "[" + GetHangul(g1, true) + "]";
+		let g2 = "[" + showPronounce(g1, true) + "]";
 
 		let g3 = grid(dict, 8, index);
-		let g4 = "[" + GetHangul(g3, true) + "]";
+		let g4 = "[" + showPronounce(g3, true) + "]";
 		let g5 = grid(dict, 9, index);
-		let g6 = "[" + GetHangul(g5, true) + "]";
+		let g6 = "[" + showPronounce(g5, true) + "]";
 		let g7 = grid(dict, 10, index);
-		let g8 = "[" + GetHangul(g7, true) + "]";
+		let g8 = "[" + showPronounce(g7, true) + "]";
 
 		let g9 = grid(dict, 11, index);
-		let g10 = "[" + GetHangul(g9, true) + "]";
+		let g10 = "[" + showPronounce(g9, true) + "]";
 		let g11 = grid(dict, 12, index);
-		let g12 = "[" + GetHangul(g11, true) + "]";
+		let g12 = "[" + showPronounce(g11, true) + "]";
 		let g13 = grid(dict, 13, index);
-		let g14 = "[" + GetHangul(g13, true) + "]";
+		let g14 = "[" + showPronounce(g13, true) + "]";
 
 		source_gram = "<details><summary style=\"font-size: 18px;\">문법 정보 보기</summary><p><strong>합성형</strong>: <strong>" + g1 + "-</strong>&nbsp;" + g2 + "</p><p><strong>단독형</strong></p>";
 
@@ -73,49 +73,49 @@ document.getElementById("submit").onclick = function() {
 	}
 	else if (word_class == "a") {
 		let g1 = grid(dict, 7, index);
-		let g2 = "[" + GetHangul(g1, true) + "]";
+		let g2 = "[" + showPronounce(g1, true) + "]";
 
 		let g3 = grid(dict, 8, index);
-		let g4 = "[" + GetHangul(g3, true) + "]";
+		let g4 = "[" + showPronounce(g3, true) + "]";
 		let g5 = grid(dict, 9, index);
-		let g6 = "[" + GetHangul(g5, true) + "]";
+		let g6 = "[" + showPronounce(g5, true) + "]";
 		let g7 = grid(dict, 10, index);
-		let g8 = "[" + GetHangul(g7, true) + "]";
+		let g8 = "[" + showPronounce(g7, true) + "]";
 
 		let g9 = grid(dict, 11, index);
-		let g10 = "[" + GetHangul(g9, true) + "]";
+		let g10 = "[" + showPronounce(g9, true) + "]";
 		let g11 = grid(dict, 12, index);
-		let g12 = "[" + GetHangul(g11, true) + "]";
+		let g12 = "[" + showPronounce(g11, true) + "]";
 		let g13 = grid(dict, 13, index);
-		let g14 = "[" + GetHangul(g13, true) + "]";
+		let g14 = "[" + showPronounce(g13, true) + "]";
 
 		let g15 = grid(dict, 14, index);
-		let g16 = "[" + GetHangul(g15, true) + "]";
+		let g16 = "[" + showPronounce(g15, true) + "]";
 		let g17 = grid(dict, 15, index);
-		let g18 = "[" + GetHangul(g17, true) + "]";
+		let g18 = "[" + showPronounce(g17, true) + "]";
 		let g19 = grid(dict, 16, index);
-		let g20 = "[" + GetHangul(g19, true) + "]";
+		let g20 = "[" + showPronounce(g19, true) + "]";
 
 		let g21 = grid(dict, 17, index);
-		let g22 = "[" + GetHangul(g21, true) + "]";
+		let g22 = "[" + showPronounce(g21, true) + "]";
 		let g23 = grid(dict, 18, index);
-		let g24 = "[" + GetHangul(g23, true) + "]";
+		let g24 = "[" + showPronounce(g23, true) + "]";
 		let g25 = grid(dict, 19, index);
-		let g26 = "[" + GetHangul(g25, true) + "]";
+		let g26 = "[" + showPronounce(g25, true) + "]";
 
 		let g27 = grid(dict, 20, index);
-		let g28 = "[" + GetHangul(g27, true) + "]";
+		let g28 = "[" + showPronounce(g27, true) + "]";
 		let g29 = grid(dict, 21, index);
-		let g30 = "[" + GetHangul(g29, true) + "]";
+		let g30 = "[" + showPronounce(g29, true) + "]";
 		let g31 = grid(dict, 22, index);
-		let g32 = "[" + GetHangul(g31, true) + "]";
+		let g32 = "[" + showPronounce(g31, true) + "]";
 
 		let g33 = grid(dict, 23, index);
-		let g34 = "[" + GetHangul(g33, true) + "]";
+		let g34 = "[" + showPronounce(g33, true) + "]";
 		let g35 = grid(dict, 24, index);
-		let g36 = "[" + GetHangul(g35, true) + "]";
+		let g36 = "[" + showPronounce(g35, true) + "]";
 		let g37 = grid(dict, 25, index);
-		let g38 = "[" + GetHangul(g37, true) + "]";
+		let g38 = "[" + showPronounce(g37, true) + "]";
 
 		source_gram = "<details><summary style=\"font-size: 18px;\">문법 정보 보기</summary><p><strong>합성형</strong>: <strong>" + g1 + "-</strong>&nbsp;" + g2 + "</p>";
 
@@ -200,19 +200,29 @@ document.getElementById("submit").onclick = function() {
 	let e6 = document.getElementsByClassName("ADFB_gloss_ex")[0];
 	e6.innerHTML = grid(dict, 6, index);
 
-	//set ABC
+	//set ABC; ABC순 앞뒤 n개
 	let source_abc = "<br><hr>"
-	for (var i = -4; i <= 4; i ++) {
+	let number_abc = 4;
+
+	for (var i = -number_abc; i <= number_abc; i ++) {
+		let link = grid(dict, 0, index + i);
+		let text = link.split("_")[0] + "<sup>" + link.split("_")[1] + "</sup>";
+
+		//too forth or back; no word to show
+		if (link.split("_").length < 2) { continue; }
+
 		if (i != 0) {
-			source_abc = source_abc + "<a onclick=\"link('" + grid(dict, 0, index + i) + "')\">" + grid(dict, 1, index + i) + "</a>";
+			source_abc = source_abc + "<a onclick=\"link('" + link + "')\">" + text + "</a>";
 		}
 		else {
-			source_abc = source_abc + "<strong><a onclick=\"link('" + grid(dict, 0, index + i) + "')\">" + grid(dict, 1, index + i) + "</a></strong>";
+			source_abc = source_abc + "<strong><a onclick=\"link('" + link + "')\">" + text + "</a></strong>";
 		}
+		
+		source_abc = source_abc + " · ";
+	}
 
-		if (i < 4) {
-			source_abc = source_abc + " · ";
-		}
+	if (source_abc.endsWith(" · ")) {
+		source_abc = source_abc.slice(0, -3);
 	}
 
 	document.getElementById("abc").innerHTML = source_abc;

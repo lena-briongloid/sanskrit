@@ -312,3 +312,13 @@
 
     return false;
   }
+
+
+function showPronounce(arg0, arg1) {
+	if (properties.showHangulInsteadOfIPA) {
+		return GetHangul(arg0, arg1);
+	}
+	else {
+		return GetIPA(arg0, arg1);
+	}
+}

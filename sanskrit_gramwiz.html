@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>«산스크리트 합성어 생성기»</title>
+	
+	<meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0">
+	<meta name="MobileOptimized" content="300">
+	<meta name="HandheldFriendly" content="true">
+
+	<link rel="stylesheet" type="text/css" href="template.css">
+
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Charis+SIL:ital,wght@0,400;0,700;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Gowun+Batang&family=Tiro+Devanagari+Sanskrit:ital@0;1&display=swap');
+	</style>
+
+</head>
+
+<body>
+
+<div id="topbar">
+	<div class="inside">
+		<div class="topmenu">
+			<a href="sanskrit.html" target="_blank"><span>사전</span></a>
+			<a class="current"><span>합성어</span></a>
+		</div>
+
+		<div class="dropdown">
+			<span class="title">About&nbsp;⮟</span>
+			<div class="submenu" id="submenu">
+				<a>About this website »</a>
+				<a>How to use this website »</a>
+				<a>Access »</a>
+				<a>News »</a>
+			</div>
+		</div>
+		<a href="sanskrit.html"><img class="logo" src="resources/logo.png"></a>
+		<div class="clear"></div>
+	</div>
+</div>
+
+<div id="envelope">
+<div id="invelope">
+
+	<form id="search_form">
+		<div class="inside">
+			<div class="inset textbox">
+				<input id="text" class="text" name="text" placeholder="2개 이상의 단어를 입력하세요. 예: kṛṣna eṇa" value="">
+				<input id="submit" class="submit" value="">
+			</div>
+			<div class="message">
+				<small>특수문자 입력:&nbsp;&nbsp;</small> <a id="input_ā">ā</a>&nbsp; <a id="input_ḍ">ḍ</a>&nbsp; <a id="input_ḥ">ḥ</a>&nbsp; <a id="input_ī">ī</a>&nbsp; <a id="input_ḷ">ḷ</a>&nbsp; <a id="input_ḹ">ḹ</a>&nbsp; <a id="input_ṃ">ṃ</a>&nbsp; <a id="input_ṅ">ṅ</a>&nbsp; <a id="input_ñ">ñ</a>&nbsp; <a id="input_ṇ">ṇ</a>&nbsp; <a id="input_ṛ">ṛ</a>&nbsp; <a id="input_ṝ">ṝ</a>&nbsp; <a id="input_ś">ś</a>&nbsp; <a id="input_ṣ">ṣ</a>&nbsp; <a id="input_ṭ">ṭ</a>&nbsp; <a id="input_ū">ū</a>&nbsp; <a id="input_’">’</a>
+			</div>
+		</div>
+	</form>
+
+	<div id="synth" style="display: block; text-align: center; line-height: 100%; margin-top: -40px"></div>
+
+	<div class="mainpage" id="mainpage" style="display: block; line-height: 200%;">
+		<hr>
+		<p style="text-align: center;"><img src="resources/logo_san_gramwiz.png" alt="SAṂDHIYANTRAM"></p>
+		<h2 style="text-align: center;">«산스크리트 합성어 생성기»</h2>
+		<hr>
+		<p>2개 이상의 단어를 로마자로 입력하면 음운 변동 규칙에 맞추어 합성하여 출력합니다. 단어를 <strong>띄어쓰기로 구분</strong>하여 입력해 주시기 바랍니다.&nbsp;<small>(예시: kṛṣna eṇa)</small></p>
+		<p>합성어와 발음은 자동 생성된 것이므로 실제 문헌과 다를 수 있습니다.</p>
+	</div>
+
+</div> <!--end invelope-->
+</div> <!--end envelope-->
+
+<div class="footer">
+	<div class="inside">
+		만든놈 <a href="https://x.com/lena_briongloid" target="_blank">유월</a>. 2024년 몇월 며칠. 저작권 어쩌고.
+	</div>
+</div>
+
+
+
+
+<!-- 마우스로 특수문자 입력 -->
+<script>
+	// ā  ḍ  ḥ  ī  ḷ  ḹ ṃ  ṅ  ñ  ṇ  ṛ ṝ ś  ṣ  ṭ  ū ’
+	document.getElementById("input_ā").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "ā";
+	});
+	document.getElementById("input_ḍ").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "ḍ";
+	});
+	document.getElementById("input_ḥ").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "ḥ";
+	});
+	document.getElementById("input_ī").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "ī";
+	});
+	document.getElementById("input_ḷ").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "ḷ";
+	});
+	document.getElementById("input_ḹ").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "ḹ";
+	});
+	document.getElementById("input_ṃ").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "ṃ";
+	});
+	document.getElementById("input_ṅ").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "ṅ";
+	});
+	document.getElementById("input_ñ").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "ñ";
+	});
+	document.getElementById("input_ṇ").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "ṇ";
+	});
+	document.getElementById("input_ṛ").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "ṛ";
+	});
+	document.getElementById("input_ṝ").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "ṝ";
+	});
+	document.getElementById("input_ś").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "ś";
+	});
+	document.getElementById("input_ṣ").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "ṣ";
+	});
+	document.getElementById("input_ṭ").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "ṭ";
+	});
+	document.getElementById("input_ū").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "ū";
+	});
+	document.getElementById("input_’").addEventListener("click", function(event) {
+		event.preventDefault();
+		document.getElementById("text").value = document.getElementById("text").value + "’";
+	});
+</script>
+
+<!-- 검색 & 변환 -->
+<script>
+	let input = document.getElementById("text");
+	input.addEventListener("keydown", function(event) {
+		if (event.key === "Enter" || event.keyCode === 13) {
+			event.preventDefault();
+			document.getElementById("submit").click();
+		}
+	});
+
+	window.onload = function() {
+		document.getElementById("text").value = "kṛṣna eṇa";
+		document.getElementById("submit").click();
+	}
+</script>
+
+<!-- 이 아래로는 모두 언어에 종속된 스크립트 -->
+<script>
+	const lang = "san";
+
+	function includeScripts(scriptPaths) {
+		scriptPaths.forEach(function(path) {
+			var script = document.createElement('script');
+			script.src = path;
+			document.head.appendChild(script);
+		});
+	}
+
+	const lang_scr = [
+		lang + "/sound.js",		// 발음 추출
+		lang + "/gramwiz.js"	// Sandhi Engine
+	]
+
+	includeScripts(lang_scr);
+</script>
+
+</body></html>
