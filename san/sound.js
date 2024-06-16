@@ -2,6 +2,8 @@
     str = str.toLowerCase();
     str = str.replace(/ṁ/g, "ṃ");
 
+    if (str == "" || str == "-") { return ""; }
+
     /*
     //마지막 요소 종성법칙 적용
     var str_array = str.split(/\s/);
@@ -9,10 +11,10 @@
     str = str_array.join(" ");
     */
 
-    var Element = [" ", "|", "m̐l", "ai", "au", "kh", "gh", "ch", "jh", "ṭh", "ḍh", "th", "dh", "ph", "bh", "a", "ā", "i", "ī", "u", "ū", "ṛ", "ṝ", "ḷ", "ḹ", "e", "o", "ṃ", "ḥ", "'", "’", "k", "g", "ṅ", "h", "c", "j", "ñ", "y", "ś", "ṭ", "ḍ", "ṇ", "r", "ṣ", "ḻ", "t", "d", "n", "l", "s", "p", "b", "m", "m̐", "v"];
+    var Element = [" ", "|", "łl", "ai", "au", "kh", "gh", "ch", "jh", "ṭh", "ḍh", "th", "dh", "ph", "bh", "a", "ā", "i", "ī", "u", "ū", "ṛ", "ṝ", "ḷ", "ḹ", "e", "o", "ṃ", "ḥ", "'", "’", "k", "g", "ṅ", "h", "c", "j", "ñ", "y", "ś", "ṭ", "ḍ", "ṇ", "r", "ṣ", "ḻ", "t", "d", "n", "l", "s", "p", "b", "m", "ł", "v"];
     var Sound = [" ", ".", "l̃", "aːi", "aːu", "kʰ", "ɡʱ", "ʨʰ", "ʥʱ", "ʈʰ", "ɖʱ", "tʰ", "dʱ", "pʰ", "bʱ", "a", "aː", "ɪ", "iː", "ʊ", "uː", "r̩", "r̩ː", "l̩", "l̩ː", "eː", "oː", "N", "h", "", "", "k", "ɡ", "ŋ", "ɦ", "ʨ", "ʥ", "ɲ", "j", "ɕ", "ʈ", "ɖ", "ɳ", "ɾ", "ʂ", "ɭ", "t", "d", "n", "l", "s", "p", "b", "m", "N", "ʋ"];
 
-    var parse_criteria = /(m̐l|ai|au|kh|gh|ch|jh|ṭh|ḍh|th|dh|ph|bh|a|ā|i|ī|u|ū|ṛ|ṝ|ḷ|ḹ|e|o|ṃ|ḥ|\'|k|g|ṅ|h|c|j|ñ|y|ś|ṭ|ḍ|ṇ|r|ṣ|ḻ|t|d|n|l|s|p|b|m|m̐|v)/i;
+    var parse_criteria = /(łl|ai|au|kh|gh|ch|jh|ṭh|ḍh|th|dh|ph|bh|a|ā|i|ī|u|ū|ṛ|ṝ|ḷ|ḹ|e|o|ṃ|ḥ|\'|k|g|ṅ|h|c|j|ñ|y|ś|ṭ|ḍ|ṇ|r|ṣ|ḻ|t|d|n|l|s|p|b|m|ł|v)/i;
 
     var str_parse = str.split(parse_criteria);
     while (str_parse.includes("")) {
@@ -111,6 +113,8 @@
   }
 
   function GetHangul(text, dummy) {
+    if (text == "" || text == "-") { return ""; }
+
   	var ipa = GetIPA(text);
 
     //장음 삭제
@@ -226,6 +230,7 @@
 
     //일부 자음군 특수 처리
     ipa = ipa.replaceAll("kS", "k.S");
+    ipa = ipa.replaceAll("Sc", "S.c");
     ipa = ipa.replaceAll("rt.t", "r.t");
 
     //자음 + v 분리

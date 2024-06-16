@@ -1,4 +1,4 @@
-﻿body { font-family: 'Cormorant Garamond', 'Gowun Batang', 'Tiro Devanagari Sanskrit', 'Charis SIL';, sans-serif; font-size: 24px; padding: 0px; margin: 0px; background-color: #F5DEAD; color: #27173D; overflow-x: hidden; }
+﻿body { font-family: 'Cormorant Garamond', 'Gowun Batang', 'Tiro Devanagari Sanskrit', 'Charis SIL';, serif; font-size: 24px; padding: 0px; margin: 0px; background-color: #F5DEAD; color: #27173D; overflow-x: hidden; }
 
 a { text-decoration: none; color: #d17d43; }
 
@@ -43,22 +43,22 @@ div.topmenu a { padding: 3px 10px; border-radius: 2px; display: block; float: le
 div.topmenu a.current { background-color: #d17d43; }
 
 div.dropdown { float: right; margin-right: 10px; position: relative; cursor: default; z-index: 20; }
-div.dropdown span.title { padding: 3px 10px; border-radius: 2px 2px 0px 0px; display: block; }
+div.dropdown span.title { padding: 3px 10px; border-radius: 2px 2px 0px 0px; display: block; font-weight: bold;}
 div.dropdown:hover span.title { background-color: #F5DEAD; box-shadow: 2px 2px 2px #9C3B00;}
 div.dropdown div.submenu { display: none; position: absolute; right: 0px; top: 1.5em; margin-top: 2px; white-space: nowrap; background-color: #F5DEAD; padding: 15px 20px 15px 10px; box-shadow: 2px 2px 2px #9C3B00; border-radius: 2px 0px 2px 2px; min-width: 100px; z-index: 20; }
 div.dropdown:hover div.submenu { display: block; }
-div.dropdown div.submenu a { display: block; padding: 5px 10px; }
+div.dropdown div.submenu a { font-weight: normal; display: block; padding: 5px 10px; }
 @media (max-width: 570px) {
 	div.dropdown { display: none; }
 }
 
-form#search_form { margin: 0px 0px 65px 0px; padding: 0px; background-color: #E5CE9D; border-radius: 0px 0px 3px 3px; box-shadow: 0px 0px 5px #9C3B00; }
-form#search_form > div.inside { padding: 15px 10px 10px 10px; }
-form#search_form div.textbox { position: relative; background-color: #e8f0fe; padding: 8px 30px 8px 8px; }
-form#search_form div.textbox input.text { display: block; border: 0px; font-family: inherit; font-size: inherit; width: 99%; background-color: #e8f0fe; }
-form#search_form div.textbox input.text:focus { outline: none; }
-form#search_form div.textbox input.submit { cursor: pointer; border: 0px; padding: 0px; width: 48px; position: absolute; top: 0px; right: 0px; bottom: 0px; background-image: url(resources/zoom.png); background-position: 5px 10px; background-repeat: no-repeat; background-color: transparent; }
-form#search_form div.message { margin: 10px 0px 0px 2px; font-weight: bold; text-align: right; margin-right: 42px;}
+.search { margin: 0px 0px 65px 0px; padding: 0px; background-color: #E5CE9D; border-radius: 0px 0px 3px 3px; box-shadow: 0px 0px 5px #9C3B00; }
+.search > div.inside { padding: 15px 10px 10px 10px; }
+.search div.textbox { position: relative; background-color: #e8f0fe; padding: 8px 30px 8px 8px; }
+.search div.textbox input.text { display: inline; border: 0px; font-family: inherit; font-size: inherit; width: 99%; background-color: #e8f0fe; }
+.search div.textbox input.text:focus { outline: none; }
+.search div.textbox img.img_query { display: inline-block; cursor: pointer; border: 0px; padding: 0px; width: 32px; position: absolute; top: 7px; right: 10px; bottom: 0px; }
+.search div.message { margin: 10px 0px 0px 2px; font-weight: bold; text-align: right; margin-right: 42px;}
 
 div.footer { background-color: #E5CE9D; font-size: 80%; box-shadow: 0px 0px 2px 0px #666666; }
 div.footer > div.inside { position: relative; width: 770px; margin: 0px auto; padding: 21px 0px 16px 0px; text-align: left; line-height: 1.5em; }
