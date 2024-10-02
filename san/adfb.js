@@ -11,8 +11,8 @@ function load_adfb(call = false) {
 
 	text = text.trim();
 
-	//filer bad words
-	const badSearch = ["", " ", "-", "=", ".", ",", ";", ":", "/"];
+	//filter bad words
+	const badSearch = ["", " ", "=", ".", ",", ";", ":", "/"];
 	if (badSearch.includes(text)) { return -1; }
 
 	//special commands
@@ -49,7 +49,13 @@ function load_adfb(call = false) {
 	//한글이 입력되면 역방향 검색으로 보냄
 	let regexHan = /[가-힣]/;
 	if (regexHan.test(text)) {
-		load_query_ko(text, call);
+		load_query_rv(text, "ko");
+		return -1;
+	}
+
+	//특정 커맨드가 입력되면 영어 역방향 검색으로 보냄
+	else if (text.startsWith("en:")) {
+		load_query_rv(text, "en");
 		return -1;
 	}
 
@@ -57,7 +63,7 @@ function load_adfb(call = false) {
 	load_query_suggest(text_search); load_query_include(text_search);
 
 	topmenu_set_graphic("topmenu_dict");
-	show_page(["search_form", "suggestions"], ["search_form_gram", "mainpage", "propertysettings"]);
+	show_page(["search_form", "suggestions"], ["propertysettings", "not_found", "ADFB", "abc", "gw_inp", "mainpage"]);
 
 	if (index == -1) {
 		//not found
@@ -91,8 +97,8 @@ function load_adfb(call = false) {
 		document.getElementById("gram").innerHTML = "";
 	}
 	//동사 문법은 어떻게 할지 고민중... 임시로 숨기기
-	else if (grid(dict, column.class, index).includes("v")) {
-		t1.innerHTML = grid(dict, column.class, index).replaceAll("v", "") + "형 동사.";
+	else if (grid(dict, column.class, index) == "v") {
+		t1.innerHTML = "동사.";
 		document.getElementById("gram").innerHTML = "";
 	}
 	else {
@@ -100,11 +106,20 @@ function load_adfb(call = false) {
 	}
 	
 ///////////////////////////////////
-//headword
+//headword & favourites
 	let t2 = document.getElementsByClassName("ADFB_head_word")[0];
-	t2.innerHTML = grid(dict, column.title, index) + "<sup>" + grid(dict, column.tag_synonym, index) + "</sup>";
+	source_t2 = grid(dict, column.title, index) + "<sup>" + grid(dict, column.tag_homonym, index) + "</sup>" + "</small>" + `<span class="sanskrit">&nbsp;${LattoDev(grid(dict, column.title, index))}</span>`;
+	if (!properties.showDevanagari) {
+		source_t2 = source_t2.replaceAll(/<span class="sanskrit">.*?<\/span>/g, "");
+	}
+	t2.innerHTML = source_t2;
+	
 	let t3 = document.getElementsByClassName("ADFB_head_sound")[0];
-	t3.innerHTML = "[" + showPronounce(grid(dict, column.title, index), true) + "]";
+	t3.innerHTML = "<span class=\"IPA\">[" + showPronounce(grid(dict, column.title, index), true) + "]</span>";
+
+	let t4 = document.getElementById("ADFB_head_favourites");
+	let t4_check = check_favourites(index) ? "★" : "☆";
+	t4.innerHTML = "&nbsp;&nbsp;<span><a class=\"add_favourites\" onclick=\"add_favourites(" + index + ")\">" + t4_check + "</a></span>"
 
 ///////////////////////////////////
 //grammar
@@ -118,62 +133,38 @@ function load_adfb(call = false) {
 		sound.push("[" + showPronounce(gram[i], true) + "]");
 	}
 
-	if (word_class == "m" || word_class == "f" || word_class == "n") {
-		source_gram = "<details><summary style=\"font-size: 18px;\">문법 정보 보기</summary><p><strong>합성형</strong>: <strong>" + gram[0] + "-</strong>&nbsp;" + sound[0] + "</p><p><strong>단독형</strong></p>";
+	if (word_class == "n" || word_class == "f" || word_class == "m") {
+		source_gram = "<details><summary style=\"font-size: 18px;\">문법 정보 보기</summary><p>";
 
-		source_gram += "<table><tr><td>&nbsp;</td><td><strong>단수</strong><sub>(하나)</sub></td><td><strong>쌍수</strong><sub>(둘)</sub></td><td><strong>복수</strong><sub>(셋 이상)</sub></td></tr>";
+		source_gram += `<p><strong>합성형</strong>: <strong>${gram[0]}</strong> <span class="sanskrit">${LattoDev(gram[0])}</span> <span class="IPA"><small>${sound[0]}</small></span></p>`;
 
-		source_gram += "<tr><td><strong>주격</strong><sub>(~이/가)</sub></td>";
-		source_gram += "<td><p><strong>" + gram[1] + "</strong></p><small class=\"IPA\">" + sound[1] + "</small></p></td>";
-		source_gram += "<td><p><strong>" + gram[2] + "</strong></p><small class=\"IPA\">" + sound[2] + "</small></p></td>";
-		source_gram += "<td><p><strong>" + gram[3] + "</strong></p><small class=\"IPA\">" + sound[3] + "</small></p></td></tr>";
+		if (word_class == "m") {
+			source_gram += `<p><strong>단독형</strong>: <strong>${gram[1]}</strong> <span class="sanskrit">${LattoDev(gram[1])}</span> <span class="IPA"><small>${sound[1]}</small></span></p>`;
+		}
+		else if (word_class == "f") {
+			source_gram += `<p><strong>단독형</strong>: <strong>${gram[2]}</strong> <span class="sanskrit">${LattoDev(gram[2])}</span> <span class="IPA"><small>${sound[2]}</small></span></p>`;
+		}
+		else if (word_class == "n") {
+			source_gram += `<p><strong>단독형</strong>: <strong>${gram[3]}</strong> <span class="sanskrit">${LattoDev(gram[3])}</span> <span class="IPA"><small>${sound[3]}</small></span></p>`;
+		}
 
-		source_gram += "<tr><td><strong>속격</strong><sub>(~의)</sub></td>";
-		source_gram += "<td><p><strong>" + gram[4] + "</strong></p><small class=\"IPA\">" + sound[4] + "</small></p></td>";
-		source_gram += "<td><p><strong>" + gram[5] + "</strong></p><small class=\"IPA\">" + sound[5] + "</small></p></td>";
-		source_gram += "<td><p><strong>" + gram[6] + "</strong></p><small class=\"IPA\">" + sound[6] + "</small></p></td></tr>";
-		source_gram += "</table><p></p></details>";
+		source_gram +=  `</details>`;
 	}
 	else if (word_class == "a") {
-		source_gram = "<details><summary style=\"font-size: 18px;\">문법 정보 보기</summary><p><strong>합성형</strong>: <strong>" + gram[0] + "-</strong>&nbsp;" + sound[0] + "</p>";
+		source_gram = "<details><summary style=\"font-size: 18px;\">문법 정보 보기</summary><p>";
 
-		source_gram += "<p><strong>남성형</strong></p>";
-		source_gram += "<table><tr><td>&nbsp;</td><td><strong>단수</strong><sub>(하나)</sub></td><td><strong>쌍수</strong><sub>(둘)</sub></td><td><strong>복수</strong><sub>(셋 이상)</sub></td></tr>";
-		source_gram += "<tr><td><strong>주격</strong><sub>(~이/가)</sub></td>";
-		source_gram += "<td><p><strong>" + gram[1] + "</strong></p><small class=\"IPA\">" + sound[1] + "</small></p></td>";
-		source_gram += "<td><p><strong>" + gram[2] + "</strong></p><small class=\"IPA\">" + sound[2] + "</small></p></td>";
-		source_gram += "<td><p><strong>" + gram[3] + "</strong></p><small class=\"IPA\">" + sound[3] + "</small></p></td></tr>";
-		source_gram += "<tr><td><strong>속격</strong><sub>(~의)</sub></td>";
-		source_gram += "<td><p><strong>" + gram[4] + "</strong></p><small class=\"IPA\">" + sound[4] + "</small></p></td>";
-		source_gram += "<td><p><strong>" + gram[5] + "</strong></p><small class=\"IPA\">" + sound[5] + "</small></p></td>";
-		source_gram += "<td><p><strong>" + gram[6] + "</strong></p><small class=\"IPA\">" + sound[6] + "</small></p></td></tr></table>";
-
-		source_gram += "<br><p><strong>여성형</strong></p>";
-		source_gram += "<table><tr><td>&nbsp;</td><td><strong>단수</strong><sub>(하나)</sub></td><td><strong>쌍수</strong><sub>(둘)</sub></td><td><strong>복수</strong><sub>(셋 이상)</sub></td></tr>";
-		source_gram += "<tr><td><strong>주격</strong><sub>(~이/가)</sub></td>";
-		source_gram += "<td><p><strong>" + gram[7] + "</strong></p><small class=\"IPA\">" + sound[7] + "</small></p></td>";
-		source_gram += "<td><p><strong>" + gram[8] + "</strong></p><small class=\"IPA\">" + sound[8] + "</small></p></td>";
-		source_gram += "<td><p><strong>" + gram[9] + "</strong></p><small class=\"IPA\">" + sound[9] + "</small></p></td></tr>";
-		source_gram += "<tr><td><strong>속격</strong><sub>(~의)</sub></td>";
-		source_gram += "<td><p><strong>" + gram[10] + "</strong></p><small class=\"IPA\">" + sound[10] + "</small></p></td>";
-		source_gram += "<td><p><strong>" + gram[11] + "</strong></p><small class=\"IPA\">" + sound[11] + "</small></p></td>";
-		source_gram += "<td><p><strong>" + gram[12] + "</strong></p><small class=\"IPA\">" + sound[12] + "</small></p></td></tr></table>";
-
-		source_gram += "<br><p><strong>중성형</strong></p>";
-		source_gram += "<table><tr><td>&nbsp;</td><td><strong>단수</strong><sub>(하나)</sub></td><td><strong>쌍수</strong><sub>(둘)</sub></td><td><strong>복수</strong><sub>(셋 이상)</sub></td></tr>";
-		source_gram += "<tr><td><strong>주격</strong><sub>(~이/가)</sub></td>";
-		source_gram += "<td><p><strong>" + gram[13] + "</strong></p><small class=\"IPA\">" + sound[13] + "</small></p></td>";
-		source_gram += "<td><p><strong>" + gram[14] + "</strong></p><small class=\"IPA\">" + sound[14] + "</small></p></td>";
-		source_gram += "<td><p><strong>" + gram[15] + "</strong></p><small class=\"IPA\">" + sound[15] + "</small></p></td></tr>";
-		source_gram += "<tr><td><strong>속격</strong><sub>(~의)</sub></td>";
-		source_gram += "<td><p><strong>" + gram[16] + "</strong></p><small class=\"IPA\">" + sound[16] + "</small></p></td>";
-		source_gram += "<td><p><strong>" + gram[17] + "</strong></p><small class=\"IPA\">" + sound[17] + "</small></p></td>";
-		source_gram += "<td><p><strong>" + gram[18] + "</strong></p><small class=\"IPA\">" + sound[18] + "</small></p></td></tr></table>";
-
-		source_gram += "<p></p></details>";
+		source_gram += `<p><strong>합성형</strong>: <strong>${gram[0]}</strong> <span class="sanskrit">${LattoDev(gram[0])}</span> <span class="IPA"><small>${sound[0]}</small></span></p>`;
+		source_gram += `<p><strong>남성 단독형</strong>: <strong>${gram[1]}</strong> <span class="sanskrit">${LattoDev(gram[1])}</span> <span class="IPA"><small>${sound[1]}</small></span></p>`;
+		source_gram += `<p><strong>여성 단독형</strong>: <strong>${gram[2]}</strong> <span class="sanskrit">${LattoDev(gram[2])}</span> <span class="IPA"><small>${sound[2]}</small></span></p>`;
+		source_gram += `<p><strong>중성 단독형</strong>: <strong>${gram[3]}</strong> <span class="sanskrit">${LattoDev(gram[3])}</span> <span class="IPA"><small>${sound[3]}</small></span></p>`;
+		source_gram +=  `</details>`;
 	}
 
 	source_gram = source_gram.replaceAll("[]", "&nbsp;");
+	if (!properties.showDevanagari) {
+		source_gram = source_gram.replaceAll(/<span class="sanskrit">.*?<\/span>/g, "");
+		source_gram = source_gram.replaceAll(/<p class="sanskrit">.*?<\/p>/g, "");
+	}
 
 	document.getElementById("gram").innerHTML = source_gram;
 
@@ -200,7 +191,7 @@ function load_adfb(call = false) {
 ///////////////////////////////////
 //encyclopaedia
 	let e3 = document.getElementsByClassName("ADFB_gloss_ep_isExist")[0];
-	if (grid(dict, column.encyclopaedia, index).length > 1) {
+	if (grid(dict, column.gloss_ep, index).length > 1) {
 		e3.innerHTML = "«해설»";
 		document.getElementById("ADFB_gloss_ep_isExist_hr").style.display = "block";
 	}
@@ -210,23 +201,7 @@ function load_adfb(call = false) {
 	}
 
 	let e4 = document.getElementsByClassName("ADFB_gloss_ep")[0];
-	e4.innerHTML = grid(dict, column.encyclopaedia, index);
-
-///////////////////////////////////
-//examples
-	let e5 = document.getElementsByClassName("ADFB_gloss_ex_isExist")[0];
-	if (grid(dict, column.example, index).length > 1) {
-		e5.innerHTML = "«예문»";
-		document.getElementById("ADFB_gloss_ex_isExist_hr").style.display = "block";
-	}
-	else {
-		e5.innerHTML = "";
-		document.getElementById("ADFB_gloss_ex_isExist_hr").style.display = "none";
-	}
-
-	let e6 = document.getElementsByClassName("ADFB_gloss_ex")[0];
-	e6.innerHTML = grid(dict, column.example, index);
-	//<em>indukirīṭa</em> 달을 새긴 자. 시바.<br><em>indukṣaya</em> 달이 차고 기우는 일.
+	e4.innerHTML = grid(dict, column.gloss_ep, index);
 
 ///////////////////////////////////
 //set ABC;
@@ -236,7 +211,7 @@ function load_adfb(call = false) {
 	for (var i = -number_abc; i <= number_abc; i ++) {
 		let link = grid(dict, column.key, index + i);
 		let t0 = grid(dict, column.title, index + i);
-		let t1 = grid(dict, column.tag_synonym, index + i);
+		let t1 = grid(dict, column.tag_homonym, index + i);
 
 		let text = t0 + "<sup>" + t1 + "</sup>";
 
@@ -261,32 +236,30 @@ function load_adfb(call = false) {
 }
 
 //역방향 검색
-function load_query_ko(text) {
+function load_query_rv(text, lang) {
 	topmenu_set_graphic("topmenu_dict");
 
-	text = text.trim();
+	text = text.trim().replaceAll(" ", "").toLowerCase();
+	if (lang == "en") { text = text.replace("en:", ""); }
 
 	let List = [];
 
-	for (var i = 0; i < dict.length; i ++) { for (var j = 0; j < dict_ko.length; j ++) {
-		let db_text = grid(dict, dict_ko[j], i).trim().replaceAll(" ", "");
-		if (db_text.includes(text)) {
-			let duplicate = false;
+	for (var i = 0; i < dict.length; i ++) {
+		let line = db_text[i].toLowerCase();
 
-			for (var k = 0; k < List.length; k ++) {
-				if (List[k][0] == i) {
-					duplicate = true; break;
-				}
+		if (line.includes(text)) {
+			let gloss = "";
+			if (lang == "ko") {
+				gloss = grid(dict, column.gloss_ko, i).replaceAll("<br>", "; ");
 			}
-
-			if (duplicate == false) {
-				let gloss = grid(dict, column.gloss_ko, i).replaceAll("<br>", "; ");
-				List.push([i, gloss]);
+			else if (lang == "en") {
+				gloss = grid(dict, column.gloss_en, i).replaceAll("<br>", "; ");
 			}
+			List.push([i, gloss]);
 		}
-	} }
+	}
 
-	show_page(["search_form"], ["search_form_gram", "suggestions", "mainpage", "propertysettings", "ADFB", "abc"]);
+	show_page(["search_form"], ["suggestions", "mainpage", "propertysettings", "ADFB", "abc"]);
 
 	if (List.length == 0) {
 		show_page(["not_found"], ["includes"]);
@@ -299,7 +272,12 @@ function load_query_ko(text) {
 	let source = "";
 
 	for (var i = 0; i < List.length; i ++) {
-		source += "<p><strong><a onclick=\"link('" + grid(dict, column.key, List[i][0]) + "')\">" + grid(dict, column.title, List[i][0]) + "</a></strong>:&nbsp;&nbsp;" + List[i][1] + "</p>";
+		let t1 = grid(dict, column.key, List[i][0]);
+		let t2 = grid(dict, column.title, List[i][0])
+		let t3 = showPronounce(t2, true);
+		let check = check_favourites(List[i][0]) ? "★" : "☆";
+
+		source += `<p><a class="add_favourites" id="ABC_fav_${List[i][0].toString().padStart(5, '0')}" onclick="add_favourites(${List[i][0]})" style="font-family: 'Charis SIL'">${check}</a>&nbsp;<strong><a onclick="link('${t1}')">${t2}</a></strong>&nbsp;<span class="IPA">[${t3}]&nbsp;:&nbsp;&nbsp;${List[i][1]}</p></span>`;
 	}
 
 	document.getElementById("includes_search").innerHTML = source;
@@ -341,7 +319,7 @@ function load_query_include(text) {
 	for (var i = 0; i < List.length; i ++) {
 		let link = grid(dict, column.key, List[i]);
 		let t0 = grid(dict, column.title, List[i]);
-		let t1 = grid(dict, column.tag_synonym, List[i]);
+		let t1 = grid(dict, column.tag_homonym, List[i]);
 
 		let t = t0 + "<sup>" + t1 + "</sup>";
 
@@ -371,7 +349,7 @@ function load_query_suggest(text) {
 
 	for (var i = 0; i < dict.length; i ++) {
 		//정확히 같은 단어는 걸러
-		if (Page == grid(dict, column.key, i).toLowerCase()) {
+		if (Page.toLowerCase() == grid(dict, column.key, i).toLowerCase()) {
 			List.push(0); continue;
 		}
 
@@ -393,6 +371,17 @@ function load_query_suggest(text) {
 			if (chr1 == "" || chr2 == "") { continue; }
 			if (chr1 == chr2) { l1 ++; }
 			if ((chr1 == "'" && chr2 == "’") || (chr2 == "'" && chr1 == "’")) { l1 ++; }
+
+			let sq = false;
+			let sq_tuple = [["a", "ā"], ["i", "ī"], ["u", "ū"], ["r", "ṛ"], ["r", "ṝ"], ["ṛ", "ṝ"], ["l", "ḷ"], ["l", "ḹ"], ["ḷ", "ḹ"], ["m", "ṃ"], ["h", "ḥ"], ["n", "ṇ"], ["n", "ṅ"], ["n", "ñ"], ["ṇ", "ṅ"], ["ṇ", "ñ"], ["ṅ", "ñ"], ["s", "ś"], ["s", "ṣ"], ["ś", "ṣ"], ["t", "ṭ"], ["d", "ḍ"]];
+
+			for (var k = 0; k < sq_tuple.length; k ++) {
+				if ((chr1 == sq_tuple[k][0] && chr2 == sq_tuple[k][1]) || (chr1 == sq_tuple[k][1] && chr2 == sq_tuple[k][0])) {
+					sq = true; break;
+				}
+			}
+			
+			if (sq) { l1 += 0.5; }
 		}
 
 		l1 /= len;
@@ -409,7 +398,7 @@ function load_query_suggest(text) {
 		List.push(likeliness);
 	}
 
-	//유사도 상위 n개 추출, 유사도 1(=같음)은 제외
+	//유사도 상위 n개 추출
 	let Index = [-1]; let IndexMax = 1; let howmany = 15;
 
 	while (Index.length <= howmany) {
@@ -436,7 +425,7 @@ function load_query_suggest(text) {
 
 		let link = grid(dict, column.key, IndexRemoveDuplicate[i]);
 		let t0 = grid(dict, column.title, IndexRemoveDuplicate[i]);
-		let t1 = grid(dict, column.tag_synonym, IndexRemoveDuplicate[i]);
+		let t1 = grid(dict, column.tag_homonym, IndexRemoveDuplicate[i]);
 
 		let t = t0 + "<sup>" + t1 + "</sup>";
 
@@ -461,39 +450,23 @@ function load_query_suggest(text) {
 
 //특수 검색어
 function load_query_command(text, call) {
-	switch (text) {
-		case "#main": load_main(call); return true; break;
-		case "#gramwiz": load_gramwiz(call); return true; break;
-		case "#property": load_property(call); return true; break;
-		case "#A": load_abc("A", call); return true; break;
-		case "#Ā": load_abc("Ā", call); return true; break;
-		case "#B": load_abc("B", call); return true; break;
-		case "#C": load_abc("C", call); return true; break;
-		case "#D": load_abc("D", call); return true; break;
-		case "#Ḍ": load_abc("Ḍ", call); return true; break;
-		case "#E": load_abc("E", call); return true; break;
-		case "#G": load_abc("G", call); return true; break;
-		case "#H": load_abc("H", call); return true; break;
-		case "#I": load_abc("I", call); return true; break;
-		case "#Ī": load_abc("Ī", call); return true; break;
-		case "#J": load_abc("J", call); return true; break;
-		case "#K": load_abc("K", call); return true; break;
-		case "#L": load_abc("L", call); return true; break;
-		case "#M": load_abc("M", call); return true; break;
-		case "#N": load_abc("N", call); return true; break;
-		case "#O": load_abc("O", call); return true; break;
-		case "#P": load_abc("P", call); return true; break;
-		case "#R": load_abc("R", call); return true; break;
-		case "#Ṛ": load_abc("Ṛ", call); return true; break;
-		case "#S": load_abc("S", call); return true; break;
-		case "#Ś": load_abc("Ś", call); return true; break;
-		case "#Ṣ": load_abc("Ṣ", call); return true; break;
-		case "#T": load_abc("T", call); return true; break;
-		case "#Ṭ": load_abc("Ṭ", call); return true; break;
-		case "#U": load_abc("U", call); return true; break;
-		case "#Ū": load_abc("Ū", call); return true; break;
-		case "#V": load_abc("V", call); return true; break;
-		case "#Y": load_abc("Y", call); return true; break;
+	if (text == "#main") {
+		load_main(call); return true;
+	}
+	else if (text == "#gramwiz") {
+		load_gramwiz_main(call); return true;
+	}
+	else if (text == "#property") {
+		load_property(call); return true;
+	}
+	else if (text == "#favourites") {
+		load_favourites(call); return true;
+	}
+	else if (text.includes("#") && text.length == 2 && text.charAt(1).toUpperCase() == text.charAt(1)) {
+		load_abc(text.charAt(1), call); return true;
+	}
+	else if (text.includes("#appendix")) {
+		load_appendix(text, call); return true;
 	}
 
 	return false;

@@ -1,329 +1,566 @@
-  function GetIPA(str, hideSyllableMark) {
-    str = str.toLowerCase();
-    str = str.replace(/ṁ/g, "ṃ");
+//반절표
+const CH = ["X", "ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ", "ㅅ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ", "J", "L", "N", "S", "V"];
+const VH = ["ㅏ", "ㅔ", "ㅣ", "ㅗ", "ㅜ", "ㅡ"];
+const SH = ["아", "가", "까", "나", "다", "따", "라", "마", "바", "빠", "사", "자", "짜", "차", "카", "타", "파", "하", "야", "*라", "냐", "샤", "와", "에", "게", "께", "네", "데", "떼", "레", "메", "베", "뻬", "세", "제", "쩨", "체", "케", "테", "페", "헤", "예", "*레", "녜", "셰", "웨", "이", "기", "끼", "니", "디", "띠", "리", "미", "비", "삐", "시", "지", "찌", "치", "키", "티", "피", "히", "이", "*리", "니", "쉬", "위", "오", "고", "꼬", "노", "도", "또", "로", "모", "보", "뽀", "소", "조", "쪼", "초", "코", "토", "포", "호", "요", "*로", "뇨", "쇼", "보", "우", "구", "꾸", "누", "두", "뚜", "루", "무", "부", "뿌", "수", "주", "쭈", "추", "쿠", "투", "푸", "후", "유", "*루", "뉴", "슈", "우", "으", "그", "끄", "느", "드", "뜨", "르", "므", "브", "쁘", "스", "즈", "쯔", "츠", "크", "트", "프", "흐", "궳", "*르", "느", "쉬", "브"];
+const Coda = ["ㄴ", "L", "ㅁ", "ㅇ", "κ", "τ", "π"];
 
-    if (str == "" || str == "-") { return ""; }
+function GetIPA(text, hideSyllableMark = false) {
+	text = text.toLowerCase().trim().replace(/ṁ/g, "ṃ");
+	text = text.replace(/\,|\.|\;|\:/g, "");
 
-    /*
-    //마지막 요소 종성법칙 적용
-    var str_array = str.split(/\s/);
-    str_array[str_array.length - 1] = Reduct(str_array[str_array.length - 1]);
-    str = str_array.join(" ");
-    */
+	let Forbidden = ["", "-", ".", ",", ";", ":", "!", "?", "~", "\"", "'"];
+	if (Forbidden.includes(text)) { return ""; }
 
-    var Element = [" ", "|", "łl", "ai", "au", "kh", "gh", "ch", "jh", "ṭh", "ḍh", "th", "dh", "ph", "bh", "a", "ā", "i", "ī", "u", "ū", "ṛ", "ṝ", "ḷ", "ḹ", "e", "o", "ṃ", "ḥ", "'", "’", "k", "g", "ṅ", "h", "c", "j", "ñ", "y", "ś", "ṭ", "ḍ", "ṇ", "r", "ṣ", "ḻ", "t", "d", "n", "l", "s", "p", "b", "m", "ł", "v"];
-    var Sound = [" ", ".", "l̃", "aːi", "aːu", "kʰ", "ɡʱ", "ʨʰ", "ʥʱ", "ʈʰ", "ɖʱ", "tʰ", "dʱ", "pʰ", "bʱ", "a", "aː", "ɪ", "iː", "ʊ", "uː", "r̩", "r̩ː", "l̩", "l̩ː", "eː", "oː", "N", "h", "", "", "k", "ɡ", "ŋ", "ɦ", "ʨ", "ʥ", "ɲ", "j", "ɕ", "ʈ", "ɖ", "ɳ", "ɾ", "ʂ", "ɭ", "t", "d", "n", "l", "s", "p", "b", "m", "N", "ʋ"];
+	const Element = [" ", "-", "|", "łl", "ai", "au", "kh", "gh", "ch", "jh", "ṭh", "ḍh", "th", "dh", "ph", "bh", "a", "ā", "i", "ī", "u", "ū", "ṛ", "ṝ", "ḷ", "ḹ", "e", "o", "ṃ", "ḥ", "'", "’", "k", "g", "ṅ", "h", "c", "j", "ñ", "y", "ś", "ṭ", "ḍ", "ṇ", "r", "ṣ", "ḻ", "t", "d", "n", "l", "s", "p", "b", "m", "ł", "v"];
+	const Sound = [" ", " ", ".", "l̃", "ɑɪ̯", "ɑʊ̯", "kʰ", "ɡʱ", "ʨʰ", "ʥʱ", "ʈʰ", "ɖʱ", "tʰ", "dʱ", "pʰ", "bʱ", "ɐ", "ɑː", "ɪ", "iː", "ʊ", "uː", "r̩", "r̩ː", "l̩", "l̩ː", "eː", "oː", "N", "h", "", "", "k", "ɡ", "ŋ", "ɦ", "ʨ", "ʥ", "ɲ", "j", "ɕ", "ʈ", "ɖ", "ɳ", "ɾ", "ʂ", "ɭ", "t", "d", "n", "l", "s", "p", "b", "m", "N", "ʋ"];
 
-    var parse_criteria = /(łl|ai|au|kh|gh|ch|jh|ṭh|ḍh|th|dh|ph|bh|a|ā|i|ī|u|ū|ṛ|ṝ|ḷ|ḹ|e|o|ṃ|ḥ|\'|k|g|ṅ|h|c|j|ñ|y|ś|ṭ|ḍ|ṇ|r|ṣ|ḻ|t|d|n|l|s|p|b|m|ł|v)/i;
+	const parse_criteria = /(łl|ai|au|kh|gh|ch|jh|ṭh|ḍh|th|dh|ph|bh|a|ā|i|ī|u|ū|ṛ|ṝ|ḷ|ḹ|e|o|ṃ|ḥ|\'|k|g|ṅ|h|c|j|ñ|y|ś|ṭ|ḍ|ṇ|r|ṣ|ḻ|t|d|n|l|s|p|b|m|ł|v)/i;
 
-    var str_parse = str.split(parse_criteria);
-    while (str_parse.includes("")) {
-      var index = str_parse.indexOf("");
-      str_parse.splice(index, 1);
-    }
+	//change orthography
+	text = text.replaceAll("cc", "tc");
+	text = text.replaceAll("rttr", "rtr");
 
-    //음절별로 쪼개기
-    var Vowel = ["a", "ā", "i", "ī", "u", "ū", "ṛ", "ṝ", "ḷ", "ḹ", "e", "ai", "o", "au"];
-    var Ender = ["k", "kh", "g", "gh", "ṅ", "c", "ch", "j", "jh", "ñ", "ṭ", "ṭh", "ḍ", "ḍh", "ṇ", "t", "th", "d", "dh", "n", "p", "ph", "b", "bh", "m"];
-    var Consn = ["h", "r", "l", "v", "ś", "ṣ", "s", "ḻ"];
+	//parse
+	let text_parse = text.split(parse_criteria);
+	text_parse = text_parse.filter(element => element !== "");
 
-    var took_vowel = false;
-    var k = -1;
+	//change
+	let ipa_parse_total = [];
+	for (var i = 0; i < text_parse.length; i ++) {
+		let index = Element.indexOf(text_parse[i]);
+		ipa_parse_total.push(Sound[index]);
+	}
 
-    while (k < str_parse.length) {
-      k ++;
-      if ([" ", "|"].includes(str_parse[k])) {
-        took_vowel = false; continue;
-      }
-      else if (k == str_parse.length - 1) {
-        break;
-      }
+	//slice by word
+	let ipa_parse = []; let subarray = [];
+	for (let element of ipa_parse_total) {
+		if (element === " ") {
+			ipa_parse.push(subarray);
+			subarray = [];
+		}
+		else {
+			subarray.push(element);
+		}
+	}
 
-      if (Vowel.includes(str_parse[k])) {
-        took_vowel = true; continue;
-      }
+	if (subarray.length > 0) {
+		ipa_parse.push(subarray);
+	}
 
-      if (took_vowel == true) {
-        if (Vowel.includes(str_parse[k])) {
-          str_parse.splice(k, 0, "|");
-          took_vowel = false;
-        }
-        else if (["ṃ", "ḥ"].includes(str_parse[k])) {
-          str_parse.splice(k + 1, 0, "|");
-          took_vowel = false;
-        }
-        else if (Ender.includes(str_parse[k])) {
-          //받아줄 모음 있음
-          if (k + 1 < str_parse.length && Vowel.includes(str_parse[k + 1])) {
-            str_parse.splice(k, 0, "|");
-          }
-          //받아줄 모음 없음
-          else {
-            str_parse.splice(k + 1, 0, "|");
-          }
+	//mark all nuclei
+	const PossibleNuclei = ["ɑɪ̯", "ɑʊ̯", "ɐ", "ɑː", "ɪ", "iː", "ʊ", "uː", "r̩", "r̩ː", "l̩", "l̩ː", "eː", "oː"];
 
-          took_vowel = false;
-        }
-        else {
-          //받아줄 모음 있음
-          if (k + 1 < str_parse.length && Vowel.includes(str_parse[k + 1])) {
-            str_parse.splice(k, 0, "|");
-            took_vowel = false;
-          }
-        }
-      }
-    }
+	let ipa_string_array = [];
 
-    //C + y 위치 재조정
-    //자+자+끊+y >> 자+끊+자+y
-    for (var i = 0; i <= str_parse.length - 4; i ++) {
-      if(Ender.concat(Consn).includes(str_parse[i]) && Ender.concat(Consn).includes(str_parse[i + 1]) && str_parse[i + 2] == "|" && str_parse[i + 3] == "y") {
-        str_parse[i + 2] = str_parse[i + 1];
-        str_parse[i + 1] = "|";
-      }
-    }
+	for (var n = 0; n < ipa_parse.length; n ++) {
+		let sound = ipa_parse[n];
 
-    //IPA 추출
-    var IPA = "";
+		let nuclei_indices = [];
+		for (var i = 0; i < sound.length; i ++) {
+			if (PossibleNuclei.includes(sound[i])) {
+				nuclei_indices.push(i);
+			}
+		}
+	
+	//possibility: V, VC, CV, CVC, CCV, CCVC
+	//slice by V
+		let Syllables = [];
+		for (var i = 0; i < nuclei_indices.length; i ++) {
+			let index = nuclei_indices[i]; let syllable = []; let limit = 0;
+			if (i > 0) { limit = nuclei_indices[i - 1] + 1; }
+	
+			for (var j = limit; j <= index; j ++) {
+				syllable.push(sound[j]);
+			}
+	
+			Syllables.push(syllable);
+		}
+	
+		Syllables.push([]);
+	
+		for (var j = nuclei_indices.at(-1) + 1; j < sound.length; j ++) {
+			Syllables.at(-1).push(sound[j]);
+		}
+	
+	//absorb ender consonant
+		for (var i = 0; i < Syllables.length - 1; i ++) {
+			//ends with nucleus, starts with twofold non-nucleus
+			if (PossibleNuclei.includes(Syllables[i].at(-1)) && Syllables[i + 1].length >= 2 && !PossibleNuclei.includes(Syllables[i + 1][0]) && !PossibleNuclei.includes(Syllables[i + 1][1])) {
+				Syllables[i].push(Syllables[i + 1].shift());
+			}
 
-    for (var i = 0; i < str_parse.length; i ++) {
-      IPA = IPA + Sound[Element.indexOf(str_parse[i])];
-    }
+			//ends with nucleus, final one with only non-nuclei
+			else if (i == Syllables.length - 2) {
+				Syllables[i] = Syllables[i].concat(Syllables.pop());
+			}
+		}
 
-    //비음
-    IPA = IPA.replace(/(aN)/g, "ã");
-    IPA = IPA.replace(/(ɪN)/g, "ĩ");
-    IPA = IPA.replace(/(ʊN)/g, "ũ");
-    IPA = IPA.replace(/(aN)/g, "ã");
-    IPA = IPA.replace(/(iN)/g, "ĩ");
-    IPA = IPA.replace(/(uN)/g, "ũ");
-    IPA = IPA.replace(/(eN)/g, "ẽ");
-    IPA = IPA.replace(/(oN)/g, "õ");
-    IPA = IPA.replace(/(aːN)/g, "ãː");
-    IPA = IPA.replace(/(iːN)/g, "ĩː");
-    IPA = IPA.replace(/(uːN)/g, "ũː");
-    IPA = IPA.replace(/(eːN)/g, "ẽː");
-    IPA = IPA.replace(/(oːN)/g, "õː");
+	//join
+		for (var i = 0; i < Syllables.length; i ++) {
+			Syllables[i] = Syllables[i].join("");
+		}
 
-    IPA = IPA.replace(/(ʨ\.)/g, "t.");
+		let ipa_string = Syllables.join(".");
 
-    IPA = IPA.replace(/(\. )/g, " ");
+		ipa_string_array.push(ipa_string);
+	}
 
-    return IPA;
-  }
+	let result = ipa_string_array.join(" ");
 
-  function GetHangul(text, dummy) {
-    if (text == "" || text == "-") { return ""; }
+	//////////document.getElementById('output').value = result;
 
-  	var ipa = GetIPA(text);
+	//syllable mark
+	if (hideSyllableMark == true){
+		result = result.replaceAll(".", "");
+	}
 
-    //장음 삭제
-    ipa = ipa.replace(/ː/g, "");
+	//nasals
+	result = result.replaceAll("ɐN", "ɐ̃");
+	result = result.replaceAll("ɪN", "ɪ̃");
+	result = result.replaceAll("iN", "ĩ");
+	result = result.replaceAll("iːN", "ĩː");
+	result = result.replaceAll("ʊN", "ʊ̃");
+	result = result.replaceAll("uN", "ũ");
+	result = result.replaceAll("uːN", "ũː");
+	result = result.replaceAll("ɑːN", "ɑ̃ː");
+	result = result.replaceAll("eːN", "ẽː");
+	result = result.replaceAll("oːN", "õː");
 
-    //모음 대체
-    ipa = ipa.replace(/ɐ/g, "a");
-    ipa = ipa.replace(/ɪ/g, "i");
-    ipa = ipa.replace(/ʊ/g, "u");
-    ipa = ipa.replace(/r̩/g, "ri");
-    ipa = ipa.replace(/l̩/g, "li");
+	//ligatures "ʨ", "ʥ"
+	result = result.replaceAll("ʨ", "t͡ɕ");
+	result = result.replaceAll("ʥ", "d͡ʑ");
 
-    //비모음 대체
-    ipa = ipa.replace(/ã/g, "aŋ");
-    ipa = ipa.replace(/ĩ/g, "iŋ");
-    ipa = ipa.replace(/ũ/g, "uŋ");
-    ipa = ipa.replace(/ẽ/g, "eŋ");
-    ipa = ipa.replace(/õ/g, "oŋ");
+	return result;
+}
 
-    //반모음 대체
-    ipa = ipa.replace(/(ji)/g, "i");
+function GetHangul(text) {
+	let ipa = GetIPA(text, true);
 
-    //자음 대체
-    ipa = ipa.replace(/ɲa/g, "Na");
-    ipa = ipa.replace(/ɲi/g, "ni");
-    ipa = ipa.replace(/ɲu/g, "Nu");
-    ipa = ipa.replace(/ɲe/g, "Ne");
-    ipa = ipa.replace(/ɲo/g, "No");
-    ipa = ipa.replace(/ɲ/g, "n");
+	///ipa simplicize; diff. by lang.
+	//long sound
+	ipa = ipa.replaceAll("ː", "");
 
-    ipa = ipa.replace(/ʱ/g, "");
-    ipa = ipa.replace(/kʰ/g, "K");
-    ipa = ipa.replace(/ɦ/g, "h");
-    ipa = ipa.replace(/ɡ/g, "g");
-    ipa = ipa.replace(/ʨʰ/g, "C");
-    ipa = ipa.replace(/ʨ/g, "c");
-    ipa = ipa.replace(/ɕ/g, "S");
-    ipa = ipa.replace(/ʈʰ/g, "T");
-    ipa = ipa.replace(/ʈ/g, "t");
-    ipa = ipa.replace(/ɖ/g, "d");
-    ipa = ipa.replace(/ɳ/g, "n");
-    ipa = ipa.replace(/ɾ/g, "r");
-    ipa = ipa.replace(/ʂ/g, "S");
-    ipa = ipa.replace(/ɭ/g, "l");
-    ipa = ipa.replace(/l̃/g, "l");
-    ipa = ipa.replace(/tʰ/g, "T");
-    ipa = ipa.replace(/pʰ/g, "P");   
-    ipa = ipa.replace(/ʋ/g, "v");
+	//nasals
+	ipa = ipa.replaceAll("ɐ̃", "ɐŋ");
+	ipa = ipa.replaceAll("ɪ̃", "ɪŋ");
+	ipa = ipa.replaceAll("ĩ", "iŋ");
+	ipa = ipa.replaceAll("ʊ̃", "ʊŋ");
+	ipa = ipa.replaceAll("ũ", "uŋ");
+	ipa = ipa.replaceAll("ɑ̃", "aŋ");
+	ipa = ipa.replaceAll("ẽ", "eŋ");
+	ipa = ipa.replaceAll("õ", "oŋ");
 
-    //자음 목록: k K g ŋ c C ʥ t T d n N p P b m j r l v s S h
-    //모음 목록: a i u e o
+	//vowel
+	ipa = ipa.replaceAll("ɐ", "a");
+	ipa = ipa.replaceAll("ɑ", "a");
+	ipa = ipa.replaceAll("ɪ̯", "i");
+	ipa = ipa.replaceAll("ɪ", "i");
+	ipa = ipa.replaceAll("ʊ̯", "u");
+	ipa = ipa.replaceAll("ʊ", "u");
 
-    //모음 분리
-    var Vow = ["a", "e", "i", "o", "u"]; var VowExt = ["a", "e", "i", "o", "u", "la", "le", "li", "lo", "lu", "ra", "re", "ri", "ro", "ru"]
-    for (var i = 0; i < Vow.length; i ++) {for (var j = 0; j < VowExt.length; j ++) {
-      ipa = ipa.replaceAll(Vow[i] + VowExt[j], Vow[i] + "." + VowExt[j]);
-    }}
+	//consonant b c C ɕ d g h j K k l m n ɲ ŋ p P r s t T v z
+	if (properties.preciseHangul) {
+		ipa = ipa.replaceAll("r̩", "rɯ");
+		ipa = ipa.replaceAll("l̩", "lɯ");
 
-    //자음 + r/n/m/ŋ/l 사이에 . 넣기
-    var Con = ["k", "K", "g", "ŋ", "c", "C", "ʥ", "t", "T", "d", "n", "p", "P", "b", "m", "j", "r", "l", "v", "s", "S", "h"];
-    var Liq = ["r", "n", "N", "m", "ŋ", "l"];
+		ipa = ipa.replaceAll("kʰ", "K");
+		ipa = ipa.replaceAll("ɡʱ", "g");
+		ipa = ipa.replaceAll("t͡ɕʰ", "C");
+		ipa = ipa.replaceAll("d͡ʑʱ", "z");
+		ipa = ipa.replaceAll("ʈʰ", "T");
+		ipa = ipa.replaceAll("ɖʱ", "d");
+		ipa = ipa.replaceAll("tʰ", "T");
+		ipa = ipa.replaceAll("dʱ", "d");
+		ipa = ipa.replaceAll("pʰ", "P");
+		ipa = ipa.replaceAll("bʱ", "b");
+		ipa = ipa.replaceAll("ɡ", "g");
+		ipa = ipa.replaceAll("ɦ", "h");
+		ipa = ipa.replaceAll("t͡ɕ", "c");
+		ipa = ipa.replaceAll("d͡ʑ", "z");
+		ipa = ipa.replaceAll("l̃", "l");
+		ipa = ipa.replaceAll("ʈ", "t");
+		ipa = ipa.replaceAll("ɖ", "d");
+		ipa = ipa.replaceAll("ɳ", "n");
+		ipa = ipa.replaceAll("ɾ", "r");
+		ipa = ipa.replaceAll("ʂ", "ɕ");
+		ipa = ipa.replaceAll("ɭ", "l");
+		ipa = ipa.replaceAll("ʋ", "v");
 
-    for (var i = 0; i < Con.length; i ++) {for (var j = 0; j < Liq.length; j ++) {
-      ipa = ipa.replaceAll(Con[i] + Liq[j], Con[i] + "." + Liq[j]);
-    }}
+		ipa = ipa.replaceAll("ɲj", "ɲ");
+		ipa = ipa.replaceAll("jj", "ij");
+		ipa = ipa.replaceAll("iij", "ij");
+	}
+	else {
+		ipa = ipa.replaceAll("r̩", "ri");
+		ipa = ipa.replaceAll("l̩", "li");
+		
+		ipa = ipa.replaceAll("kʰ", "K");
+		ipa = ipa.replaceAll("k", "K");
+		ipa = ipa.replaceAll("ɡʱ", "g");
+		ipa = ipa.replaceAll("t͡ɕʰ", "C");
+		ipa = ipa.replaceAll("t͡ɕ", "C");
+		ipa = ipa.replaceAll("d͡ʑʱ", "z");
+		ipa = ipa.replaceAll("ʈʰ", "T");
+		ipa = ipa.replaceAll("ʈ", "T");
+		ipa = ipa.replaceAll("ɖʱ", "d");
+		ipa = ipa.replaceAll("tʰ", "T");
+		ipa = ipa.replaceAll("t", "T");
+		ipa = ipa.replaceAll("dʱ", "d");
+		ipa = ipa.replaceAll("pʰ", "P");
+		ipa = ipa.replaceAll("p", "P");
+		ipa = ipa.replaceAll("bʱ", "b");
+		ipa = ipa.replaceAll("ɡ", "g");
+		ipa = ipa.replaceAll("ɦ", "h");
+		ipa = ipa.replaceAll("d͡ʑ", "z");
+		ipa = ipa.replaceAll("l̃", "l");
+		ipa = ipa.replaceAll("ɖ", "d");
+		ipa = ipa.replaceAll("ɳ", "n");
+		ipa = ipa.replaceAll("ɾ", "r");
+		ipa = ipa.replaceAll("ʂ", "ɕ");
+		ipa = ipa.replaceAll("ɭ", "l");
+		ipa = ipa.replaceAll("ʋ", "v");
 
-    //(모음) + (유음 제외한 자음) + . + (모음 또는 (n m r l + 모음)) >> 모음 + . + 유음 제외한 자음 + . + + 모음 또는 n m r l
-    var Vow = ["a", "e", "i", "o", "u"];
-    var Con = ["k", "K", "g", "c", "C", "ʥ", "t", "T", "d", "p", "P", "b", "j", "r", "v", "s", "S", "h"];
-    var Liq = ["j", "a", "e", "i", "o", "u", "na", "Na", "ma", "ra", "la", "va", "ne", "Ne", "me", "re", "le", "ve", "ni", "Ni", "mi", "ri", "li", "vi", "no", "No", "mo", "ro", "lo", "vo", "nu", "Nu", "mu", "ru", "lu", "vu"];
+		ipa = ipa.replaceAll("sj", "ɕ");
+		ipa = ipa.replaceAll("ɲj", "ɲ");
+		ipa = ipa.replaceAll("jj", "ij");
+		ipa = ipa.replaceAll("iij", "ij");
+	}
 
-    for (var i = 0; i < Vow.length; i ++) {for (var j = 0; j < Con.length; j ++) {for (var k = 0; k < Liq.length; k ++) {
-      ipa = ipa.replaceAll(Vow[i] + Con[j] + "." + Liq[k], Vow[i] + "." + Con[j] + "." + Liq[k]);
-    }}}
+	//categorize
+	const Vow = ["a", "e", "i", "o", "u"];
+	const Con = ["b", "c", "C", "ɕ", "d", "g", "h", "j", "K", "k", "l", "m", "n", "ɲ", "ŋ", "p", "P", "r", "s", "t", "T", "v", "z", "π", "τ", "κ"];
+	const parse_criteria = /(a|e|i|o|u|ɯ|b|c|C|ɕ|d|g|h|j|K|k|l|m|n|ɲ|ŋ|p|P|r|s|t|T|v|z|π|τ|κ|\s)/i;
+	let ipa_parse = ipa.split(parse_criteria); ipa_parse = ipa_parse.filter(element => element !== ""); ipa_parse = [" "].concat(ipa_parse); ipa_parse.push(" ");
 
-    //자음 + j >> . + 자음 + . + j
-    var Con = ["k", "K", "g", "ŋ", "c", "C", "ʥ", "t", "T", "d", "n", "N", "p", "P", "b", "m", "j", "r", "l", "v", "s", "S", "h"];
+	///epenthesis rules; diff. by lang
 
-    for (var i = 0; i < Con.length; i ++) {
-      ipa = ipa.replaceAll(Con[i] + "j", "." + Con[i] + ".j");
-    }
+	//[l 제외한 자음] + j + <a, e, i, o, u> -> j 앞에 분절
+	var CT = ["b", "c", "C", "ɕ", "d", "g", "h", "j", "K", "k", "m", "n", "ɲ", "ŋ", "p", "P", "r", "s", "t", "T", "v", "z"];
 
-    //유음 제외한 자모음 + "." + l > l 복제
-    var Con = ["a", "i", "u", "e", "o", "k", "K", "g", "c", "C", "ʥ", "t", "T", "d", "p", "P", "b", "j", "r", "v", "s", "S", "h"];
+	for (var n = 1; n < ipa_parse.length - 2; n ++) { for (var i = 0; i < CT.length; i ++) {
+		if (CT.includes(ipa_parse[n]) && ipa_parse[n + 1] == "j") {
+			ipa_parse.splice(n + 1, 0, "ɯ");
+		}
+	}}
 
-    for (var i = 0; i < Con.length; i ++) {
-      ipa = ipa.replaceAll(Con[i] + ".l", Con[i] + "l.l");
-    }
+	//불파음; 모음 + 파열음 + 자음
+	//if (properties.preciseHangul) {
+		var VT = ["a", "e", "i", "o", "u", "ɯ"];
+		var AT = ["b", "d", "g", "K", "k", "p", "P", "t", "T", "c"];
+		var BT = ["b", "c", "C", "ɕ", "d", "g", "K", "k", "p", "P", "s", "t", "T", "z"];
+		var NT = ["π", "τ", "κ", "κ", "κ", "π", "π", "τ", "τ", "τ"]
 
-    //모음 + r s S h 분리, a.ŋ >> aŋ., ŋa >> ŋ.a
-    var Vow = ["a", "e", "i", "o", "u"];
+		for (var n = 1; n < ipa_parse.length - 2; n ++) { for (var i = 0; i < VT.length; i ++) { for (var j = 0; j < AT.length; j ++) { for (var k = 0; k < BT.length; k ++) {
+			if (VT.includes(ipa_parse[n]) && AT.includes(ipa_parse[n + 1]) && (BT.includes(ipa_parse[n + 2]) || ipa_parse[n + 2] == " " || n == ipa_parse.length - 3)) {
+			let x = AT.indexOf(ipa_parse[n + 1]); ipa_parse[n + 1] = NT[x];
+			}
+		}}}}
+	//}
 
-    for (var i = 0; i < Vow.length; i ++) {
-      ipa = ipa.replaceAll(Vow[i] + "r", Vow[i] + ".r");
-      ipa = ipa.replaceAll(Vow[i] + "s", Vow[i] + ".s");
-      ipa = ipa.replaceAll(Vow[i] + "S", Vow[i] + ".S");
-      ipa = ipa.replaceAll(Vow[i] + "h", Vow[i] + ".h");
-      ipa = ipa.replaceAll(Vow[i] + ".ŋ", Vow[i] + "ŋ.");
-      ipa = ipa.replaceAll("ŋ" + Vow[i], "ŋ." + Vow[i]);
-    }
+	//장애음 + 자음
+	var AT = ["b", "c", "C", "ɕ", "d", "g", "h", "j", "K", "k", "p", "P", "r", "s", "t", "T", "v", "z"];
+	var BT = ["b", "c", "C", "ɕ", "d", "g", "h", "j", "K", "k", "l", "m", "n", "ɲ", "ŋ", "p", "P", "r", "s", "t", "T", "v", "z"];
 
-    //음절 끝소리 무성음화
-    for (var i = 0; i < Vow.length; i ++) {
-      ipa = ipa.replaceAll(Vow[i] + "K.", Vow[i] + "k.");
-      ipa = ipa.replaceAll(Vow[i] + "g.", Vow[i] + "k.");
-      ipa = ipa.replaceAll(Vow[i] + "C.", Vow[i] + "t.");
-      ipa = ipa.replaceAll(Vow[i] + "ʥ.", Vow[i] + "t.");
-      ipa = ipa.replaceAll(Vow[i] + "T.", Vow[i] + "t.");
-      ipa = ipa.replaceAll(Vow[i] + "d.", Vow[i] + "t.");
-      ipa = ipa.replaceAll(Vow[i] + "P.", Vow[i] + "p.");
-      ipa = ipa.replaceAll(Vow[i] + "b.", Vow[i] + "p.");
-    }
+	for (var n = 1; n < ipa_parse.length - 1; n ++) { for (var i = 0; i < AT.length; i ++) { for (var j = 0; j < BT.length; j ++) {
+		if (AT.includes(ipa_parse[n]) && BT.includes(ipa_parse[n + 1])) {
+			ipa_parse.splice(n + 1, 0, "ɯ");
+		}
+	}}}
 
-    //일부 자음군 특수 처리
-    ipa = ipa.replaceAll("kS", "k.S");
-    ipa = ipa.replaceAll("Sc", "S.c");
-    ipa = ipa.replaceAll("rt.t", "r.t");
+	//어말 장애음
+	for (var n = 1; n < ipa_parse.length - 1; n ++) { for (var i = 0; i < AT.length; i ++) {
+		if (AT.includes(ipa_parse[n]) && ipa_parse[n + 1] == " ") {
+			ipa_parse.splice(n + 1, 0, "ɯ");
+		}
+	}}
 
-    //자음 + v 분리
-    var Con = ["k", "K", "g", "ŋ", "c", "C", "ʥ", "t", "T", "d", "n", "p", "P", "b", "m", "j", "r", "l", "v", "s", "S", "h"];
-    for (var i = 0; i < Con.length; i ++) {
-      ipa = ipa.replaceAll(Con[i] + "v", Con[i] + ".v");
-    }
+	//<n m ŋ> + <n m ŋ>인데 앞이나 뒤 중 한 곳이라도 모음이 없으면 삽입음
+	var ST = ["n", "m", "ŋ", "ɲ"];
+	var VT = ["a", "e", "i", "o", "u", "ɯ"];
 
-    //모음 + 자음 아직도 분리 안 됐다면 분리하기 (ab > a.b)
-    var Vow = ["a", "e", "i", "o", "u"];
-    var Con = ["K", "g", "c", "C", "ʥ", "T", "d", "P", "b", "v", "s", "S", "h"];
+	for (var n = 1; n < ipa_parse.length - 2; n ++) { for (var i = 0; i < ST.length; i ++) { for (var j = 0; j < ST.length; j ++) {
+		if (ST.includes(ipa_parse[n]) && ST.includes(ipa_parse[n + 1]) && (!VT.includes(ipa_parse[n - 1]) || !VT.includes(ipa_parse[n + 2]))) {
+			ipa_parse.splice(n + 1, 0, "ɯ");
+		}
+	}}}
 
-    for (var i = 0; i < Vow.length; i ++) {for (var j = 0; j < Con.length; j ++) {
-      ipa = ipa.replaceAll(Vow[i] + Con[j], Vow[i] + "." + Con[j]);
-    }}
+	//자음 + ŋ 사이에 삽입음
+	var CT = ["b", "c", "C", "ɕ", "d", "g", "h", "j", "K", "k", "l", "m", "n", "ɲ", "ŋ", "p", "P", "r", "s", "t", "T", "v", "z"];
 
-    ipa = ipa.replaceAll("..", ".");
-    ipa = ipa.replaceAll(" .", ".");
-    ipa = ipa.replaceAll(". ", ".");
-    ipa = ipa.replace(/^\./g, "");
-    ipa = ipa.replace(/\.$/g, "");
+	for (var n = 0; n < ipa_parse.length - 1; n ++) { for (var i = 0; i < CT.length; i ++) {
+		if (CT.includes(ipa_parse[n]) && ipa_parse[n + 1] == "ŋ") {
+			ipa_parse.splice(n + 1, 0, "ɯ");
+		}
+	}}
 
-    //나뉜 음절을 한글로 변환하기
-    var hangul = "";
-    var ipa_parse = ipa.split(".");
+	//ɲ 바로 뒤에 자음이 오면 n으로 변경
+	for (var n = 0; n < ipa_parse.length - 1; n ++) { for (var i = 0; i < CT.length; i ++) {
+		if (ipa_parse[n] == "ɲ" && CT.includes(ipa_parse[n + 1])) {
+			ipa_parse[n] = "n";
+		}
+	}}
 
-    const HanBef = [" ", "k", "K", "g", "ŋ", "c", "C", "ʥ", "t", "T", "d", "n", "N", "p", "P", "b", "m", "j", "r", "l", "v", "s", "S", "h", "a", "ka", "Ka", "ga", "ŋa", "ca", "Ca", "ʥa", "ta", "Ta", "da", "na", "Na", "pa", "Pa", "ba", "ma", "ja", "ra", "la", "va", "sa", "Sa", "ha", "i", "ki", "Ki", "gi", "ŋi", "ci", "Ci", "ʥi", "ti", "Ti", "di", "ni", "Ni", "pi", "Pi", "bi", "mi", "ji", "ri", "li", "vi", "si", "Si", "hi", "u", "ku", "Ku", "gu", "ŋu", "cu", "Cu", "ʥu", "tu", "Tu", "du", "nu", "Nu", "pu", "Pu", "bu", "mu", "ju", "ru", "lu", "vu", "su", "Su", "hu", "e", "ke", "Ke", "ge", "ŋe", "ce", "Ce", "ʥe", "te", "Te", "de", "ne", "Ne", "pe", "Pe", "be", "me", "je", "re", "le", "ve", "se", "Se", "he", "o", "ko", "Ko", "go", "ŋo", "co", "Co", "ʥo", "to", "To", "do", "no", "No", "po", "Po", "bo", "mo", "jo", "ro", "lo", "vo", "so", "So", "ho"];
-    const HanAft = [" ", "끄", "크", "그", "응", "쯔", "츠", "즈", "뜨", "트", "드", "느", "느", "쁘", "프", "브", "므", "이", "르", "르", "브", "스", "쉬", "흐", "아", "까", "카", "가", "뀨", "짜", "차", "자", "따", "타", "다", "나", "냐", "빠", "파", "바", "마", "야", "라", "라", "와", "사", "샤", "하", "이", "끼", "키", "기", "뀨", "찌", "치", "지", "띠", "티", "디", "니", "니", "삐", "피", "비", "미", "이", "리", "리", "위", "시", "시", "히", "우", "꾸", "쿠", "구", "뀨", "쭈", "추", "주", "뚜", "투", "두", "누", "뉴", "뿌", "푸", "부", "무", "유", "루", "루", "부", "수", "슈", "후", "에", "께", "케", "게", "뀨", "쩨", "체", "제", "떼", "테", "데", "네", "녜", "뻬", "페", "베", "메", "예", "레", "레", "웨", "세", "셰", "헤", "오", "꼬", "코", "고", "뀨", "쪼", "초", "조", "또", "토", "도", "노", "뇨", "뽀", "포", "보", "모", "요", "로", "로", "워", "소", "쇼", "호"];
+	//어두 L을 R로
+	for (var n = 1; n < ipa_parse.length - 1; n ++) {
+		if (ipa_parse[n - 1] == " " && ipa_parse[n] == "l") {
+			ipa_parse[n] = "r";
+		}
+	}
 
-    //띄어쓰기
-    for (var i = 0; i < ipa_parse.length; i ++) {
-      if (ipa_parse[i].includes(" ") && ipa_parse[i] != " ") {
-        var split = ipa_parse[i].split(" ");
-        ipa_parse.splice(i, 1, split[0], " ", split[1]);
-      }
-    }
+	//어두 ŋ을 ɯŋ으로
+	for (var n = 1; n < ipa_parse.length - 1; n ++) {
+		if (ipa_parse[n - 1] == " " && ipa_parse[n] == "ŋ") {
+			ipa_parse.splice(n, 0, "ɯ");
+		}
+	}
 
-    for (var i = 0; i < ipa_parse.length; i ++) {
-      var syllable = ipa_parse[i];
-      var syl_final = "";
-      var space = false;
+	//와를 바로
+	if (!properties.preciseHangul) {
+		for (var n = 0; n < ipa_parse.length; n ++) {
+			if (ipa_parse[n] == "v") {
+				ipa_parse[n] = "b";
+			}
+		}
+	}
 
-      if (syllable.length > 1 && !(syllable.endsWith("a") || syllable.endsWith("i") || syllable.endsWith("u") || syllable.endsWith("e") || syllable.endsWith("o"))) {
-        syl_final = syllable.charAt(syllable.length - 1);
-        syllable = syllable.slice(0, syllable.length - 1);
-      }
+	///ipa hangulize
+	let han = ipa_parse.join("");
 
-      var syl_han = HanAft[HanBef.indexOf(syllable)];
+	//과교정 제거
+	han = han.replaceAll("nɯj", "nj");
+	han = han.replaceAll("mɯj", "mj");
+	han = han.replaceAll("ɲɯj", "nj");
+	han = han.replaceAll(" nj", " nɯj");
+	han = han.replaceAll(" mj", " mɯj");
+	han = han.replaceAll(" ɲj", " ɲɯj");
 
-      if (syl_final == "k") {
-        syl_han = String.fromCharCode(syl_han.charCodeAt(0) + 1);
-      }
-      else if (syl_final == "n") {
-        syl_han = String.fromCharCode(syl_han.charCodeAt(0) + 4);
-      }
-      else if (syl_final == "l") {
-        syl_han = String.fromCharCode(syl_han.charCodeAt(0) + 8);
-      }
-      else if (syl_final == "m") {
-        syl_han = String.fromCharCode(syl_han.charCodeAt(0) + 16);
-      }
-      else if (syl_final == "p") {
-        syl_han = String.fromCharCode(syl_han.charCodeAt(0) + 17);
-      }
-      else if (syl_final == "t") {
-        syl_han = String.fromCharCode(syl_han.charCodeAt(0) + 19);
-      }
-      else if (syl_final == "ŋ") {
-        syl_han = String.fromCharCode(syl_han.charCodeAt(0) + 21);
-      }
+	//vowel
+	han = han.replaceAll("a", "ㅏ");
+	han = han.replaceAll("e", "ㅔ");
+	han = han.replaceAll("i", "ㅣ");
+	han = han.replaceAll("o", "ㅗ");
+	han = han.replaceAll("u", "ㅜ");
+	han = han.replaceAll("ɯ", "ㅡ");
 
-      hangul = hangul + syl_han;
-    }
+	//consonant
+	han = han.replaceAll("b", "ㅂ");
+	han = han.replaceAll("c", "ㅉ");
+	han = han.replaceAll("C", "ㅊ");
+	han = han.replaceAll("ɕ", "S");
+	han = han.replaceAll("d", "ㄷ");
+	han = han.replaceAll("g", "ㄱ");
+	han = han.replaceAll("h", "ㅎ");
+	han = han.replaceAll("j", "J");
+	han = han.replaceAll("K", "ㅋ");
+	han = han.replaceAll("k", "ㄲ");
+	han = han.replaceAll("l", "L");
+	han = han.replaceAll("m", "ㅁ");
+	han = han.replaceAll("n", "ㄴ");
+	han = han.replaceAll("ɲ", "N");
+	han = han.replaceAll("ŋ", "ㅇ");
+	han = han.replaceAll("p", "ㅃ");
+	han = han.replaceAll("P", "ㅍ");
+	han = han.replaceAll("r", "ㄹ");
+	han = han.replaceAll("s", "ㅅ");
+	han = han.replaceAll("t", "ㄸ");
+	han = han.replaceAll("T", "ㅌ");
+	han = han.replaceAll("v", "V");
+	han = han.replaceAll("z", "ㅈ");
 
-    return hangul;
-  }
+	//to array
+	HAN = [];
+	for (var i = 0; i < han.length; i ++) { HAN.push(han.charAt(i)); }
 
-  function anyof(check, array) {
-    for (var i = 0; i < array.length; i ++) {
-      if (check == array[i]) {
-        return true;
-      }
-    }
+	//non-greedy onset + nucleus
+	for (var i = 0; i < HAN.length - 1; i ++) {
+		//find cons. or vow.
+		let p = HAN[i]; let q = HAN[i + 1]; let a = ""; let b = "";
 
-    return false;
-  }
+		//space found
+		if ([" ", "κ", "τ", "π"].includes(p)) { continue; }
+		
+		//vowel found
+		else if (VH.includes(p)) { a = "X"; b = p; }
 
+		//cons. found
+		else if (CH.includes(p)) {
+			//cons. seq. or final
+			if (CH.includes(q) || q == " ") { continue; }
+			//cons + vow.
+			else { a = p; b = HAN[i + 1]; }
+		}
+
+		//cons. not able to be onset
+		if (p == "ㅇ") { continue; }
+
+		//execute banjeol
+		let s = HangulBanjeol(a, b);
+
+		//alternate
+		HAN[i] = s; if (a != "X") { HAN.splice(i + 1, 1) }
+	}
+
+	//coda
+	for (var i = 0; i < HAN.length - 1; i ++) {
+		//p_mark: /l/ to *ㄹ
+		let p = HAN[i]; let q = HAN[i + 1]; let p_mark = 0;
+		if (p.charAt(0) == "*") { p_mark = 1; }
+
+		//check if p is a complete hangul syllable
+		let puc = p.charCodeAt(p_mark);
+		if (!(44032 <= puc && puc <= 55203)) { continue; }
+
+		//check if q is one of coda-able
+		if (!Coda.includes(q)) { continue; }
+
+		switch (q) {
+			case "ㄴ":
+				HAN[i] = (p_mark == 1 ? "*" : "") + String.fromCharCode(puc + 4);
+				HAN.splice(i + 1, 1);
+				break;
+	
+			case "ㅁ":
+				HAN[i] = (p_mark == 1 ? "*" : "") + String.fromCharCode(puc + 16);
+				HAN.splice(i + 1, 1);
+				break;
+				
+			case "ㅇ":
+				HAN[i] = (p_mark == 1 ? "*" : "") + String.fromCharCode(puc + 21);
+				HAN.splice(i + 1, 1);
+				break;
+
+			case "κ":
+				HAN[i] = (p_mark == 1 ? "*" : "") + String.fromCharCode(puc + 1);
+				HAN.splice(i + 1, 1);
+				break;	
+
+			case "τ":
+				HAN[i] = (p_mark == 1 ? "*" : "") + String.fromCharCode(puc + 19);
+				HAN.splice(i + 1, 1);
+				break;
+
+			case "π":
+				HAN[i] = (p_mark == 1 ? "*" : "") + String.fromCharCode(puc + 17);
+				HAN.splice(i + 1, 1);
+				break;
+	
+			case "L":
+				HAN[i] = (p_mark == 1 ? "*" : "") + String.fromCharCode(puc + 8);
+				HAN[i + 1] = "ㄹ";
+				break;
+		}
+	}
+
+	//l-mark
+	for (var i = 1; i < HAN.length; i ++) {
+		let p = HAN[i - 1]; let q = HAN[i]; let puc = p.charCodeAt(0);
+
+		//check if p is a codaless hangul syllable
+		if (!SH.includes(p)) { continue; }
+
+		//check if q is l-marked
+		if (q.charAt(0) != "*") { continue; }
+
+		HAN[i] = HAN[i].replace("*", "");
+		HAN[i - 1] = String.fromCharCode(puc + 8);
+	}
+
+	//epenthesis as helm
+	const Sol = ["ㄴ", "ㄹ", "ㅁ", "ㅇ"];
+	const Aft = ["는", "늘", "늠", "능", "른", "를", "름", "릉", "믄", "믈", "믐", "믕", "븩", "븬", "븯", "븰"];
+
+	for (var i = 0; i < HAN.length - 1; i ++) {
+		let p = HAN[i]; let q = HAN[i + 1];
+
+		if (!Sol.includes(p) || !Sol.includes(q)) { continue; }
+
+		let pi = Sol.indexOf(p); let qi = Sol.indexOf(q); let s = pi * Sol.length + qi;
+
+		HAN[i] = Aft[s]; HAN.splice(i + 1, 1);
+	}
+
+	//delete non-syllables
+	for (var i = 0; i < HAN.length; i ++) {
+		let p = HAN[i];
+
+		if (p != " " && !(44032 <= p.charCodeAt(0) && p.charCodeAt(0) <= 55203)) {
+			HAN.splice(i, 1);
+		}
+	}
+
+	///return
+	return HAN.join("").trim();
+}
+
+function HangulBanjeol(onset, nucleus) {
+	let a = CH.indexOf(onset); let b = VH.indexOf(nucleus);
+	if (a == -1) { return "뵥"; } if (b == -1) { return "뱝"; }
+
+	let num = b * CH.length + a;
+	return SH[num];
+}
 
 function showPronounce(arg0, arg1) {
+	if (arg0 == "") { return ""; }
+
 	if (properties.showHangulInsteadOfIPA) {
 		return GetHangul(arg0, arg1);
 	}
 	else {
 		return GetIPA(arg0, arg1);
 	}
+}
+
+
+
+function LattoDev(text) {
+	if (text == "") { return ""; }
+
+	//첫 글자가 모음이면 대문자로 올리기
+	let Vow = ["a", "e", "i", "o", "u", "ā", "ī", "ū", "ṛ", "ṝ", "ḷ", "ḹ"];
+
+	if (Vow.includes(text.charAt(0))) {
+		text = text.charAt(0).toUpperCase() + text.slice(1);
+	}
+
+	for (var i = 0; i < Vow.length; i ++) {
+		text = text.replaceAll(" " + Vow[i], " " + Vow[i].toUpperCase());
+		text = text.replaceAll("’" + Vow[i], "’" + Vow[i].toUpperCase());
+	}
+
+	//마지막 글자가 자음이면 위라마 추가
+	let Con = ["b", "c", "d", "ḍ", "g", "h", "j", "k", "l", "ḻ", "m", "n", "ṅ", "ñ", "ṇ", "p", "r", "s", "ś", "ṣ", "t", "ṭ", "v", "y"];
+
+	if (Con.includes(text.charAt(text.length - 1))) {
+		text += "V";
+	}
+
+	for (var i = 0; i < Vow.length; i ++) {
+		text = text.replaceAll(Con[i] + " ", Con[i] + " " + "V");
+	}
+
+	//자음연쇄 사이에 위라마 추가
+	Con = ["k", "kh", "g", "gh", "ṅ", "h", "c", "ch", "j", "jh", "ñ", "y", "ś", "ṭ", "ṭh", "ḍ", "ḍh", "ṇ", "r", "ṣ", "ḻ", "t", "th", "d", "dh", "n", "l", "s", "p", "ph", "b", "bh", "m", "v"];
+
+	for (var i = 0; i < Con.length; i ++) { for (var j = 0; j < Con.length; j ++) { 
+		if (Con[j] == "h") { continue; }
+		text = text.replaceAll(Con[i] + Con[j], Con[i] + "V" + Con[j]);
+	}}
+
+
+	let IAST = [" ", "V", "łl", "ai", "Ai", "au", "Au", "bh", "ch", "dh", "ḍh", "gh", "jh", "kh", "ph", "th", "ṭh", "’", "a", "A", "ā", "Ā", "b", "c", "d", "ḍ", "e", "E", "g", "h", "ḥ", "i", "I", "ī", "Ī", "j", "k", "l", "ḷ", "Ḷ", "ḻ", "ḹ", "Ḹ", "m", "ṃ", "n", "ṅ", "ñ", "ṇ", "o", "O", "p", "r", "ṛ", "Ṛ", "ṝ", "Ṝ", "s", "ś", "ṣ", "t", "ṭ", "u", "U", "ū", "Ū", "v", "y"];
+	let DEVA = [" ", "्", "लँल", "ै", "ऐ", "ौ", "औ", "भ", "छ", "ध", "ढ", "घ", "झ", "ख", "फ", "थ", "ठ", "ऽ", "", "अ", "ा", "आ", "ब", "च", "द", "ड", "े", "ए", "ग", "ह", "ः", "ि", "इ", "ी", "ई", "ज", "क", "ल", "ॢ", "ऌ", "ळ", "ॣ", "ॡ", "म", "ं", "न", "ङ", "ञ", "ण", "ो", "ओ", "प", "र", "ृ", "ऋ", "ॄ", "ॠ", "स", "श", "ष", "त", "ट", "ु", "उ", "ू", "ऊ", "व", "य"];
+	let IAST_regex = /(V|łl|ai|Ai|au|Au|bh|ch|dh|ḍh|gh|jh|kh|ph|th|ṭh|’|a|A|ā|Ā|b|c|d|ḍ|e|E|g|h|ḥ|i|I|ī|Ī|j|k|l|ḷ|Ḷ|ḻ|ḹ|Ḹ|m|ṃ|n|ṅ|ñ|ṇ|o|O|p|r|ṛ|Ṛ|ṝ|Ṝ|s|ś|ṣ|t|ṭ|u|U|ū|Ū|v|y|\s)/i;
+
+	//parse
+	let text_parse = text.split(IAST_regex);
+	text_parse = text_parse.filter(element => element !== "");
+
+	//change
+	let result = "";
+	for (var i = 0; i < text_parse.length; i ++) {
+		result += DEVA[IAST.indexOf(text_parse[i])];
+	}
+
+	return result;
 }
