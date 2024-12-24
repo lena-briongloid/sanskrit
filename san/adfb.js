@@ -48,7 +48,7 @@ function load_adfb(call = false) {
 
 	//hangul => reverse db
 	let regexHan = /[가-힣]/;
-	if (regexHan.test(text)) {
+	if (regexHan.test(text) && !text.startsWith("tag:")) {
 		load_query_rv(text, "ko");
 		return -1;
 	}
@@ -56,6 +56,12 @@ function load_adfb(call = false) {
 	//en: command => reverse db
 	else if (text.startsWith("en:")) {
 		load_query_rv(text, "en");
+		return -1;
+	}
+
+	//tag: command => tag search
+	else if (text.startsWith("tag:")) {
+		load_query_tag(text);
 		return -1;
 	}
 
@@ -81,29 +87,29 @@ function load_adfb(call = false) {
 //title
 	let t1 = document.getElementsByClassName("ADFB_word_class")[0];
 	if (grid(dict, column.class, index) == "m") {
-		t1.innerHTML = "남성 명사.";
+		t1.innerHTML = "남성 명사. ";
 	}
 	else if (grid(dict, column.class, index) == "f") {
-		t1.innerHTML = "여성 명사.";
+		t1.innerHTML = "여성 명사. ";
 	}
 	else if (grid(dict, column.class, index) == "n") {
-		t1.innerHTML = "중성 명사.";
+		t1.innerHTML = "중성 명사. ";
 	}
 	else if (grid(dict, column.class, index) == "a") {
-		t1.innerHTML = "형용사.";
+		t1.innerHTML = "모든 성 명사 & 형용사. ";
 	}
 	else if (grid(dict, column.class, index) == "i") {
-		t1.innerHTML = "불변사.";
+		t1.innerHTML = "불변사. ";
 		document.getElementById("gram").innerHTML = "";
 	}
 	else if (grid(dict, column.class, index) == "v") {
-		t1.innerHTML = "동사.";
+		t1.innerHTML = "동사. ";
 		document.getElementById("gram").innerHTML = "";
 	}
 	else {
-		t1.innerHTML = "ERR"
+		t1.innerHTML = "ERR";
 	}
-	
+
 ///////////////////////////////////
 //headword & favourites
 	let t2 = document.getElementsByClassName("ADFB_head_word")[0];
@@ -121,9 +127,33 @@ function load_adfb(call = false) {
 	t4.innerHTML = "&nbsp;&nbsp;<span><a class=\"add_favourites\" onclick=\"add_favourites(" + index + ")\">" + t4_check + "</a></span>"
 
 ///////////////////////////////////
+//tags
+	let source_gram = "";
+
+	const tag_flav = ["기초", "인명", "지명", "자연", "천문", "도구", "문화", "동물", "사회", "신체", "과학", "식물", "불교", "힌두교", "자이나교", "시크교", "장소", "시간", "대명사", "숫자"];
+	const tag_link = ["기초", "인명", "지명", "자연", "천문", "도구", "문화", "동물", "사회", "신체", "과학", "식물", "불교", "힌두", "자이", "시크", "장소", "시간", "대명", "숫자"];
+	
+	const tag = grid(dict, column.tag_category, index);
+	if (tag != "") {
+		const Tag = tag.split(";");
+		source_gram += `<p><strong>태그: </strong>`;
+		for (let i = 0; i < Tag.length; i ++) {
+			let t0 = Tag[i]; let t1 = "";
+			if (tag_link.includes(t0)) {
+				t1 = tag_flav[tag_link.indexOf(t0)];
+			}
+
+			source_gram += `<a onclick="link('${"tag:" + t0}')">${t1}</a>&nbsp;`
+
+			if (i < Tag.length - 1) { source_gram += "·&nbsp;"; }
+		}
+		source_gram += `</p>`;
+	}
+
+
+///////////////////////////////////
 //grammar
 	let word_class = grid(dict, column.class, index);
-	let source_gram = "";
 
 	//make grammar array
 	let gram = []; let sound = [];
@@ -133,7 +163,7 @@ function load_adfb(call = false) {
 	}
 
 	if (word_class == "n" || word_class == "f" || word_class == "m") {
-		source_gram = "<details><summary style=\"font-size: 18px;\">문법 정보 보기</summary><p>";
+		source_gram += "<p><details><summary style=\"font-size: 18px;\">문법 정보 보기</summary></p><p>";
 
 		source_gram += `<p><strong>합성형</strong>: <strong>${gram[0]}</strong> <span class="sanskrit">${LattoDev(gram[0])}</span> <span class="IPA"><small>${sound[0]}</small></span></p>`;
 
@@ -186,7 +216,7 @@ function load_adfb(call = false) {
 		source_gram +=  `</details>`;
 	}
 	else if (word_class == "a") {
-		source_gram = "<details><summary style=\"font-size: 18px;\">문법 정보 보기</summary><p>";
+		source_gram += "<p><details><summary style=\"font-size: 18px;\">문법 정보 보기</summary></p><p>";
 
 		source_gram += `<p><strong>합성형</strong>: <strong>${gram[0]}</strong> <span class="sanskrit">${LattoDev(gram[0])}</span> <span class="IPA"><small>${sound[0]}</small></span></p>`;
 
@@ -346,11 +376,61 @@ function load_query_rv(text, lang) {
 
 	for (let i = 0; i < List.length; i ++) {
 		let t1 = grid(dict, column.key, List[i][0]);
-		let t2 = grid(dict, column.title, List[i][0])
+		let t2 = grid(dict, column.title, List[i][0]);
 		let t3 = showPronounce(t2, true);
+		
 		let check = check_favourites(List[i][0]) ? "★" : "☆";
 
-		source += `<p><a class="add_favourites" id="ABC_fav_${List[i][0].toString().padStart(5, '0')}" onclick="add_favourites(${List[i][0]})" style="font-family: 'Charis SIL'">${check}</a>&nbsp;<strong><a onclick="link('${t1}')">${t2}</a></strong>&nbsp;<span class="IPA">[${t3}]&nbsp;:&nbsp;&nbsp;${List[i][1]}</p></span>`;
+		let basic = grid(dict, column.tag_category, List[i][0]).includes("기초") ? true : false;
+		let text = basic ? `<strong>${t2}</strong>` : t2;
+
+		source += `<p><a class="add_favourites" id="ABC_fav_${List[i][0].toString().padStart(5, '0')}" onclick="add_favourites(${List[i][0]})" style="font-family: 'Charis SIL'">${check}</a>&nbsp;<a onclick="link('${t1}')">${text}</a>&nbsp;<span class="IPA">[${t3}]&nbsp;:&nbsp;&nbsp;${List[i][1]}</p></span>`;
+	}
+
+	document.getElementById("includes_search").innerHTML = source;
+}
+
+//태그 검색
+function load_query_tag(text) {
+	topmenu_set_graphic("topmenu_dict");
+
+	text = text.trim().replaceAll(" ", "").toLowerCase();
+	text = text.replace("tag:", "");
+
+	let List = [];
+
+	for (let i = 0; i < dict.length; i ++) {
+		let line = grid(dict, column.tag_category, i);
+
+		if (line.includes(text)) {
+			let gloss = grid(dict, column.gloss_ko, i).replaceAll("<br>", "; ");
+			List.push([i, gloss]);
+		}
+	}
+
+	show_page(["search_form"], ["suggestions", "mainpage", "propertysettings", "ADFB", "abc"]);
+
+	if (List.length == 0) {
+		show_page(["not_found"], ["includes"]);
+		return 0;
+	}
+	else {
+		show_page(["includes"], ["not_found"]);
+	}
+
+	let source = "";
+
+	for (let i = 0; i < List.length; i ++) {
+		let t1 = grid(dict, column.key, List[i][0]);
+		let t2 = grid(dict, column.title, List[i][0]);
+		let t3 = showPronounce(t2, true);
+		
+		let check = check_favourites(List[i][0]) ? "★" : "☆";
+
+		let basic = (grid(dict, column.tag_category, List[i][0]).includes("기초")) ? true : false;
+		let text = basic ? `<strong>${t2}</strong>` : t2;
+
+		source += `<p><a class="add_favourites" id="ABC_fav_${List[i][0].toString().padStart(5, '0')}" onclick="add_favourites(${List[i][0]})" style="font-family: 'Charis SIL'">${check}</a>&nbsp;<a onclick="link('${t1}')">${text}</a>&nbsp;<span class="IPA">[${t3}]&nbsp;:&nbsp;&nbsp;${List[i][1]}</p></span>`;
 	}
 
 	document.getElementById("includes_search").innerHTML = source;

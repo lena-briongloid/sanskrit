@@ -115,21 +115,23 @@ function GetIPA(text, hideSyllableMark = false) {
 		result = result.replaceAll(".", "");
 	}
 
-	//nasals
-	result = result.replaceAll("ɐN", "ɐ̃");
-	result = result.replaceAll("ɪN", "ɪ̃");
-	result = result.replaceAll("iN", "ĩ");
-	result = result.replaceAll("iːN", "ĩː");
-	result = result.replaceAll("ʊN", "ʊ̃");
-	result = result.replaceAll("uN", "ũ");
-	result = result.replaceAll("uːN", "ũː");
-	result = result.replaceAll("ɑːN", "ɑ̃ː");
-	result = result.replaceAll("eːN", "ẽː");
-	result = result.replaceAll("oːN", "õː");
+	//nasals and ligatures
+	let RepRule01 = [
+		{ search: "ɐN", 	replace: "ɐ̃"	},
+		{ search: "ɪN", 	replace: "ɪ̃"	},
+		{ search: "iN", 	replace: "ĩ"	},
+		{ search: "iːN", 	replace: "ĩː"	},
+		{ search: "ʊN", 	replace: "ʊ̃"	},
+		{ search: "uN", 	replace: "ũ"	},
+		{ search: "uːN", 	replace: "ũː"	},
+		{ search: "ɑːN", 	replace: "ɑ̃ː"	},
+		{ search: "eːN", 	replace: "ẽː"	},
+		{ search: "oːN", 	replace: "õː"	},
+		{ search: "ʨ", 		replace: "t͡ɕ"	},
+		{ search: "ʥ", 		replace: "d͡ʑ"	}
+	];
 
-	//ligatures "ʨ", "ʥ"
-	result = result.replaceAll("ʨ", "t͡ɕ");
-	result = result.replaceAll("ʥ", "d͡ʑ");
+	result = RepRule01.reduce((acc, { search, replace }) => acc.replaceAll(search, replace), result);
 
 	return result;
 }
@@ -165,84 +167,107 @@ function GetHangul(text) {
 
 	//consonant b c C ɕ d g h j K k l m n ɲ ŋ p P r s t T v z
 	if (properties.preciseHangul) {
-		const replacements = {
-		    'r̩': 'rɯ',
-		    'l̩': 'lɯ',
-		    'kʰ': 'K',
-		    'ɡʱ': 'g',
-		    't͡ɕʰ': 'C',
-		    'd͡ʑʱ': 'z',
-		    'ʈʰ': 'T',
-		    'ɖʱ': 'd',
-		    'tʰ': 'T',
-		    'dʱ': 'd',
-		    'pʰ': 'P',
-		    'bʱ': 'b',
-		    'ɡ': 'g',
-		    'ɦ': 'h',
-		    't͡ɕ': 'c',
-		    'd͡ʑ': 'z',
-		    'l̃': 'l',
-		    'ʈ': 't',
-		    'ɖ': 'd',
-		    'ɳ': 'n',
-		    'ɾ': 'r',
-		    'ʂ': 'ɕ',
-		    'ɭ': 'l',
-		    'ʋ': 'v',
-		    'ɲj': 'ɲ',
-		    'jj': 'ij',
-		    'll': 'l',
-		    'iij': 'ij'
-		};
+		const RepRule = [
+			{ search: "r̩", replace: "rɯ" },
+			{ search: "l̩", replace: "lɯ" },
+			{ search: "kʰ", replace: "K" },
+			{ search: "ɡʱ", replace: "g" },
+			{ search: "t͡ɕʰ", replace: "C" },
+			{ search: "d͡ʑʱ", replace: "z" },
+			{ search: "ʈʰ", replace: "T" },
+			{ search: "ɖʱ", replace: "d" },
+			{ search: "tʰ", replace: "T" },
+			{ search: "dʱ", replace: "d" },
+			{ search: "pʰ", replace: "P" },
+			{ search: "bʱ", replace: "b" },
+			{ search: "ɡ", replace: "g" },
+			{ search: "ɦ", replace: "h" },
+			{ search: "t͡ɕ", replace: "c" },
+			{ search: "d͡ʑ", replace: "z" },
+			{ search: "l̃", replace: "l" },
+			{ search: "ʈ", replace: "t" },
+			{ search: "ɖ", replace: "d" },
+			{ search: "ɳ", replace: "n" },
+			{ search: "ɾ", replace: "r" },
+			{ search: "ʂ", replace: "ɕ" },
+			{ search: "ɭ", replace: "l" },
+			{ search: "ʋ", replace: "v" },
+			{ search: "ɲj", replace: "ɲ" },
+			{ search: "jj", replace: "ij" },
+			{ search: "ll", replace: "l" },
+			{ search: "iij", replace: "ij" }
+		];
 
-		ipa = ipa.replace(/r̩|l̩|kʰ|ɡʱ|t͡ɕʰ|d͡ʑʱ|ʈʰ|ɖʱ|tʰ|dʱ|pʰ|bʱ|ɡ|ɦ|t͡ɕ|d͡ʑ|l̃|ʈ|ɖ|ɳ|ɾ|ʂ|ɭ|ʋ|ɲj|jj|ll|iij/g, match => replacements[match]);
+		ipa = RepRule.reduce((acc, { search, replace }) => acc.replaceAll(search, replace), ipa);
 	}
 	else {
-		const replacements = {
-		    'r̩': 'ri',
-		    'l̩': 'li',
-		    'kʰ': 'K',
-		    'k': 'K',
-		    'ɡʱ': 'g',
-		    't͡ɕʰ': 'C',
-		    't͡ɕ': 'C',
-		    'd͡ʑʱ': 'z',
-		    'ʈʰ': 'T',
-		    'ʈ': 'T',
-		    'ɖʱ': 'd',
-		    'tʰ': 'T',
-		    't': 'T',
-		    'dʱ': 'd',
-		    'pʰ': 'P',
-		    'p': 'P',
-		    'bʱ': 'b',
-		    'ɡ': 'g',
-		    'ɦ': 'h',
-		    'd͡ʑ': 'z',
-		    'l̃': 'l',
-		    'ɖ': 'd',
-		    'ɳ': 'n',
-		    'ɾ': 'r',
-		    'ʂ': 'ɕ',
-		    'ɭ': 'l',
-		    'ʋ': 'v',
-		    'sj': 'ɕ',
-		    'ɲj': 'ɲ',
-		    'jj': 'ij',
-		    'll': 'l',
-		    'iij': 'ij'
-		};
+		const RepRule = [
+			{ search: "r̩", replace: "ri" },
+			{ search: "l̩", replace: "li" },
+			{ search: "kʰ", replace: "K" },
+			{ search: "k", replace: "K" },
+			{ search: "ɡʱ", replace: "g" },
+			{ search: "t͡ɕʰ", replace: "C" },
+			{ search: "t͡ɕ", replace: "C" },
+			{ search: "d͡ʑʱ", replace: "z" },
+			{ search: "ʈʰ", replace: "T" },
+			{ search: "ʈ", replace: "T" },
+			{ search: "ɖʱ", replace: "d" },
+			{ search: "tʰ", replace: "T" },
+			{ search: "t", replace: "T" },
+			{ search: "dʱ", replace: "d" },
+			{ search: "pʰ", replace: "P" },
+			{ search: "p", replace: "P" },
+			{ search: "bʱ", replace: "b" },
+			{ search: "ɡ", replace: "g" },
+			{ search: "ɦ", replace: "h" },
+			{ search: "d͡ʑ", replace: "z" },
+			{ search: "l̃", replace: "l" },
+			{ search: "ɖ", replace: "d" },
+			{ search: "ɳ", replace: "n" },
+			{ search: "ɾ", replace: "r" },
+			{ search: "ʂ", replace: "ɕ" },
+			{ search: "ɭ", replace: "l" },
+			{ search: "ʋ", replace: "v" },
+			{ search: "sj", replace: "ɕ" },
+			{ search: "ɲj", replace: "ɲ" },
+			{ search: "jj", replace: "ij" },
+			{ search: "ll", replace: "l" },
+			{ search: "iij", replace: "ij" }
+		];
 
-		ipa = ipa.replace(/r̩|l̩|kʰ|k|ɡʱ|t͡ɕʰ|t͡ɕ|d͡ʑʱ|ʈʰ|ʈ|ɖʱ|tʰ|t|dʱ|pʰ|p|bʱ|ɡ|ɦ|d͡ʑ|l̃|ɖ|ɳ|ɾ|ʂ|ɭ|ʋ|sj|ɲj|jj|ll|iij/g, match => replacements[match]);
+		ipa = RepRule.reduce((acc, { search, replace }) => acc.replaceAll(search, replace), ipa);
 	}
 
+	// 트야 >> 티야
 	if (!properties.preciseHangul) {
-		ipa = ipa.replace(/(Cj)/g, "Cij");
-		ipa = ipa.replace(/(Tj)/g, "Tij");
-		ipa = ipa.replace(/(dj)/g, "dij");
-		ipa = ipa.replace(/(lj)/g, "lij");
+		const RepRule = [
+			{ search: "Cj", replace: "Cij" },
+			{ search: "Tj", replace: "Tij" },
+			{ search: "dj", replace: "dij" },
+			{ search: "lj", replace: "lij" }
+		];
+
+		ipa = RepRule.reduce((acc, { search, replace }) => acc.replaceAll(search, replace), ipa);
 	}
+
+	//닥다 >> 다그다
+	const RepRule02 = [
+		{ search: "gb", replace: "gɯb" },
+		{ search: "gd", replace: "gɯd" },
+		{ search: "gz", replace: "gɯz" },
+		{ search: "bg", replace: "bɯb" },
+		{ search: "bd", replace: "bɯd" },
+		{ search: "bz", replace: "bɯz" },
+		{ search: "db", replace: "dɯb" },
+		{ search: "dg", replace: "dɯd" },
+		{ search: "dz", replace: "dɯz" },
+		{ search: "ml", replace: "mɯl" }
+	];
+	ipa = RepRule02.reduce((acc, { search, replace }) => acc.replaceAll(search, replace), ipa);
+	ipa = ipa.replace(/\b(mr)/g, "mɯr");
+	ipa = ipa.replace(/\b(nr)/g, "nɯr");
+	
 
 	//categorize
 	const Vow = ["a", "e", "i", "o", "u"];
@@ -345,45 +370,54 @@ function GetHangul(text) {
 	let han = ipa_parse.join("");
 
 	//과교정 제거
-	han = han.replaceAll("nɯj", "nj");
-	han = han.replaceAll("mɯj", "mj");
-	han = han.replaceAll("ɲɯj", "nj");
-	han = han.replaceAll(" nj", " nɯj");
-	han = han.replaceAll(" mj", " mɯj");
-	han = han.replaceAll(" ɲj", " ɲɯj");
+	const RepRule03 = [
+		{ search: "nɯj", replace: "nj" },
+		{ search: "mɯj", replace: "mj" },
+		{ search: "ɲɯj", replace: "nj" },
+		{ search: " nj", replace: " nɯj" },
+		{ search: " mj", replace: " mɯj" },
+		{ search: " ɲj", replace: " ɲɯj" }
+	];
+	han = RepRule03.reduce((acc, { search, replace }) => acc.replaceAll(search, replace), han);
 
 	//vowel
-	han = han.replaceAll("a", "ㅏ");
-	han = han.replaceAll("e", "ㅔ");
-	han = han.replaceAll("i", "ㅣ");
-	han = han.replaceAll("o", "ㅗ");
-	han = han.replaceAll("u", "ㅜ");
-	han = han.replaceAll("ɯ", "ㅡ");
+	const RepRule04 = [
+		{ search: "a", replace: "ㅏ" },
+		{ search: "e", replace: "ㅔ" },
+		{ search: "i", replace: "ㅣ" },
+		{ search: "o", replace: "ㅗ" },
+		{ search: "u", replace: "ㅜ" },
+		{ search: "ɯ", replace: "ㅡ" }
+	];
+	han = RepRule04.reduce((acc, { search, replace }) => acc.replaceAll(search, replace), han);
 
 	//consonant
-	han = han.replaceAll("b", "ㅂ");
-	han = han.replaceAll("c", "ㅉ");
-	han = han.replaceAll("C", "ㅊ");
-	han = han.replaceAll("ɕ", "S");
-	han = han.replaceAll("d", "ㄷ");
-	han = han.replaceAll("g", "ㄱ");
-	han = han.replaceAll("h", "ㅎ");
-	han = han.replaceAll("j", "J");
-	han = han.replaceAll("K", "ㅋ");
-	han = han.replaceAll("k", "ㄲ");
-	han = han.replaceAll("l", "L");
-	han = han.replaceAll("m", "ㅁ");
-	han = han.replaceAll("n", "ㄴ");
-	han = han.replaceAll("ɲ", "N");
-	han = han.replaceAll("ŋ", "ㅇ");
-	han = han.replaceAll("p", "ㅃ");
-	han = han.replaceAll("P", "ㅍ");
-	han = han.replaceAll("r", "ㄹ");
-	han = han.replaceAll("s", "ㅅ");
-	han = han.replaceAll("t", "ㄸ");
-	han = han.replaceAll("T", "ㅌ");
-	han = han.replaceAll("v", "V");
-	han = han.replaceAll("z", "ㅈ");
+	const RepRule05 = [
+		{ search: "b", replace: "ㅂ" },
+		{ search: "c", replace: "ㅉ" },
+		{ search: "C", replace: "ㅊ" },
+		{ search: "ɕ", replace: "S" },
+		{ search: "d", replace: "ㄷ" },
+		{ search: "g", replace: "ㄱ" },
+		{ search: "h", replace: "ㅎ" },
+		{ search: "j", replace: "J" },
+		{ search: "K", replace: "ㅋ" },
+		{ search: "k", replace: "ㄲ" },
+		{ search: "l", replace: "L" },
+		{ search: "m", replace: "ㅁ" },
+		{ search: "n", replace: "ㄴ" },
+		{ search: "ɲ", replace: "N" },
+		{ search: "ŋ", replace: "ㅇ" },
+		{ search: "p", replace: "ㅃ" },
+		{ search: "P", replace: "ㅍ" },
+		{ search: "r", replace: "ㄹ" },
+		{ search: "s", replace: "ㅅ" },
+		{ search: "t", replace: "ㄸ" },
+		{ search: "T", replace: "ㅌ" },
+		{ search: "v", replace: "V" },
+		{ search: "z", replace: "ㅈ" }
+	];
+	han = RepRule05.reduce((acc, { search, replace }) => acc.replaceAll(search, replace), han);
 
 	//to array
 	HAN = [];
@@ -529,8 +563,6 @@ function showPronounce(arg0, arg1) {
 	}
 }
 
-
-
 function LattoDev(text) {
 	if (text == "") { return ""; }
 
@@ -581,6 +613,22 @@ function LattoDev(text) {
 	for (let i = 0; i < text_parse.length; i ++) {
 		result += DEVA[IAST.indexOf(text_parse[i])];
 	}
+
+	return result;
+}
+
+//substring 변환
+function replace_pair(string, array_pair_before, array_pair_after) {
+	const replacements = array_pair_before.map((bef, index) => ({
+		bef, aft: array_pair_after[index]
+	}));
+
+	const regex = new RegExp(replacements.map(r => r.bef).join('|'), 'g');
+
+	let result = string.replace(regex, (matched) => {
+		const replacement = replacements.find(r => r.bef === matched);
+		return replacement ? replacement.aft : matched;
+	});
 
 	return result;
 }
